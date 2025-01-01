@@ -55,4 +55,12 @@ export const configuration = () => ({
     version: process.env.VERSION || '1.0',
     host:
     process.env.APP_HOST || `http://localhost:${process.env.PORT || 3456}`,
+    Queue: {
+      url: process.env.REDIS_URL,
+      port: process.env.REDIS_PORT,
+      host: process.env.REDIS_HOST,
+      user: process.env.REDIS_USERNAME,
+      pass: process.env.REDIS_PASS,
+      db: process.env.REDIS_DB || 'shadow-troupe',
+    },
 })
