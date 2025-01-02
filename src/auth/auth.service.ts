@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
+import EventsManager from 'src/common/events/events.manager';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UserSignUpDto } from './dto/auth.dto';
 
@@ -17,6 +18,7 @@ export class AuthService {
     constructor (
         private readonly prisma: PrismaClient,
         private usersService: UsersService,
+        private eventsManager:EventsManager,
     ){
         
     }
