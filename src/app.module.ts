@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { EventsManagerModule } from './common/events/events.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -19,7 +20,8 @@ import { EventsManagerModule } from './common/events/events.module';
   PrismaModule,
   AuthModule,
   UsersModule,
-  EventsManagerModule,],
+  EventsManagerModule,
+  QueueModule,],
   controllers: [AppController],
   providers: [AppService],
 })

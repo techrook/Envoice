@@ -4,4 +4,9 @@ export const CONSTANT = {
     onUserRegister: 'user.register',
     CONFIRM_MAIL_SENT: (mail) =>
         `A confirmation email has been successfully sent to ${mail}. Please check your inbox and click the provided link to complete the process.`,
+    sendConfirmationMail: 'confirmation.mail.request',
+    onPasswordChange: 'user.password.change.success',
+    AuthQ: 'auth-queue',
+    onUserLogin: 'user.login',
+    onPasswordReset: 'user.password.reset.success',
 }
