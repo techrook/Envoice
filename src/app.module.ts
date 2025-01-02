@@ -6,6 +6,7 @@ import { configuration, validate } from '../config/configuration';
 import { LoggerModule } from './common/log/logger.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -15,7 +16,8 @@ import { AuthModule } from './auth/auth.module';
   }),
   LoggerModule,
   PrismaModule,
-  AuthModule,],
+  AuthModule,
+  UsersModule,],
   controllers: [AppController],
   providers: [AppService],
 })

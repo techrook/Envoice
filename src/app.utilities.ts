@@ -1,0 +1,13 @@
+import { Injectable } from "@nestjs/common";
+import * as argon from 'argon2';
+@Injectable()
+export class AppUtilities {
+    public static async hashPassword(password: string): Promise<string> {
+        try {
+          const hashedPassword = await argon.hash(password);
+          return hashedPassword;
+        } catch (error) {
+          throw new Error('Oops! Something went wrong!');
+        }
+      }
+}
