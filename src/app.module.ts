@@ -7,6 +7,7 @@ import { LoggerModule } from './common/log/logger.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { EventsManagerModule } from './common/events/events.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -17,7 +18,8 @@ import { UsersModule } from './users/users.module';
   LoggerModule,
   PrismaModule,
   AuthModule,
-  UsersModule,],
+  UsersModule,
+  EventsManagerModule,],
   controllers: [AppController],
   providers: [AppService],
 })

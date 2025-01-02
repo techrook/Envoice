@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { createUserDto, UserSignUpDto } from 'src/auth/dto/auth.dto';
+import { CrudService } from 'src/common/database/crud.service';
+import { UsersMapType } from './users.mapType';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 export interface IGetUserBy<T = keyof Prisma.UserWhereInput, R = string> {
     field: T;
@@ -8,12 +11,14 @@ export interface IGetUserBy<T = keyof Prisma.UserWhereInput, R = string> {
   }
 
 @Injectable()
-export class UsersService {
+export class UsersService extends CrudService<
+Prisma.UserDelegate,
+UsersMapType
+>  {
     constructor(
-        private readonly prisma: PrismaClient,
-        // private readonly eventsManager: EventsManager,
+        private readonly prisma: PrismaService,
       ) {
-
+        super(prisma.user);
       }
 
       async getBy(dto: IGetUserBy) {

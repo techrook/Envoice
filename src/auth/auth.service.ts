@@ -1,5 +1,5 @@
 import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
@@ -16,7 +16,7 @@ const {
 @Injectable()
 export class AuthService {
     constructor (
-        private readonly prisma: PrismaClient,
+        private readonly prisma: PrismaService,
         private usersService: UsersService,
         private eventsManager:EventsManager,
     ){
