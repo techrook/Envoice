@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { configuration, validate } from '../config/configuration';
 import { LoggerModule } from './common/log/logger.module';
@@ -22,7 +20,7 @@ import { QueueModule } from './queue/queue.module';
   UsersModule,
   EventsManagerModule,
   QueueModule,],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

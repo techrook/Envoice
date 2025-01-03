@@ -8,7 +8,7 @@ import { AppApiTags } from './common/interfaces/openapi';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bufferLogs:true,
+    bufferLogs: true,
   });
   app.useLogger(app.get(AppLogger));
 
@@ -26,7 +26,7 @@ async function bootstrap() {
   const appName = configService.get('appName');
   const appVersion = configService.get('version');
   const appHost = configService.get('host');
-  
+
   const initSwagger = (app: INestApplication, serverUrl: string) => {
     const config = new DocumentBuilder()
       .setTitle(appName)
@@ -35,19 +35,19 @@ async function bootstrap() {
       .addServer(serverUrl, 'Development Server')
 
       .addBearerAuth();
-    
-      for (const ApiTagName in AppApiTags) {
-        config.addTag(ApiTagName, AppApiTags[ApiTagName].description);
-      }
-      const document = SwaggerModule.createDocument(app, config.build());
-  
-      SwaggerModule.setup('/api-docs', app, document, {
-        swaggerOptions: {
-          persistAuthorization: true,
-        },
-      });
-    };
-  
+
+    for (const ApiTagName in AppApiTags) {
+      config.addTag(ApiTagName, AppApiTags[ApiTagName].description);
+    }
+    const document = SwaggerModule.createDocument(app, config.build());
+
+    SwaggerModule.setup('/api-docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    });
+  };
+
   logger.log(`Starting [${configService.get('appName')}] on port=[${port}]`);
   initSwagger(app, appHost);
   await app.listen(port);
