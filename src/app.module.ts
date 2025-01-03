@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { EventsManagerModule } from './common/events/events.module';
 import { QueueModule } from './queue/queue.module';
+import { EmailModule } from './common/email/email.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -19,7 +20,8 @@ import { QueueModule } from './queue/queue.module';
   AuthModule,
   UsersModule,
   EventsManagerModule,
-  QueueModule,],
+  QueueModule,
+  EmailModule,],
   controllers: [],
   providers: [],
 })
