@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import * as argon from 'argon2';
+import * as crypto from 'crypto';
+import * as fs from 'fs';
 @Injectable()
 export class AppUtilities {
     public static async hashPassword(password: string): Promise<string> {
@@ -23,5 +25,22 @@ export class AppUtilities {
         encoding: BufferEncoding = 'base64',
       ): string {
         return Buffer.from(data).toString(encoding);
+      }
+      public static generateToken(len?: number): string {
+        return crypto.randomBytes(len || 32).toString('hex');
+      }
+    
+      public static generateWalletAdd(len?: number): string {
+        return this.generateToken(len).toUpperCase();
+      }
+    
+      public static hashToken(token: string, userId?: string): string {
+        return crypto
+          .createHash('sha256')
+          .update(token + (userId || ''))
+          .digest('hex');
+      }
+      public static readFile(filePath: string) {
+        return fs.readFileSync(filePath, 'utf8');
       }
 }
