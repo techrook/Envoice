@@ -10,6 +10,7 @@ import { UserSignUpDto, UserLoginDto } from './dto/auth.dto';
 import { TokenUtil } from './jwttoken/token.util';
 
 
+import { PrismaClient } from '@prisma/client';
 
 const {
     CREDS_TAKEN,
@@ -22,10 +23,9 @@ const {
 @Injectable()
 export class AuthService {
     constructor (
-        private readonly prisma: PrismaService,
+        private readonly prisma: PrismaClient,
         private usersService: UsersService,
         private eventsManager:EventsManager,
-        private readonly jwtService: JwtService
     ){
         
     }
@@ -34,8 +34,9 @@ export class AuthService {
    */
   async signUp(dto: UserSignUpDto) {
     try {
-      let isExistingUser = await this.usersService.findUserByEmail(dto.email);
-      if (isExistingUser) throw new ConflictException(CREDS_TAKEN);
+      
+      let isExistingUser =  await this.usersService.findUserByEmail(dto.email);
+       if (isExistingUser) throw new ConflictException(CREDS_TAKEN);
 
       isExistingUser = await this.usersService.findUserByUsername(dto.username);
       if (isExistingUser) throw new ConflictException(USERNAME_TAKEN);
@@ -43,7 +44,7 @@ export class AuthService {
       const password = await AppUtilities.hashPassword(dto.password);
       const user = await this.usersService.registerUser(dto, password);
 
-      this.eventsManager.onUserRegister(user);
+      // this.eventsManager.onUserRegister(user);
       return {
         message: CONFIRM_MAIL_SENT(dto.email),
       };

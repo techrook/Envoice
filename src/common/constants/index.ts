@@ -9,6 +9,29 @@ export const CONSTANT = {
     AuthQ: 'auth-queue',
     onUserLogin: 'user.login',
     onPasswordReset: 'user.password.reset.success',
+<<<<<<< HEAD
     INCORRECT_CREDS: 'Incorrect Credentials',
     MAIL_UNVERIFIED: 'Email has not been verified'
 }
+=======
+    OOPS: `Ooops! Something went wrong, this is not you!`,
+}
+
+export const MAIL = {
+    noreply: 'noreply@playlistswap.ng',
+    waitListSubject: 'Welcome to Playlist Swap',
+    waitListFrom: 'The Swap Crew',
+    urlLogin: "PlaylistSwap Login: Here's the secure login link you requested",
+    passwordReset: 'Playlist Swap: Password  Reset',
+    confirmEmail: 'Envoice: Email Verification',
+    welcomeMail: 'PlaylistSwap: Welcome Onboard',
+    passswordChange:
+      'PlaylistSwap Security: Your Password has been changed successfully',
+    subscriptionSuccessfulMail:
+      'Subscription Successful! Welcome to Playlist Swap',
+    subscriptionDeActivate: 'Subscription DeActivated',
+    TwoDayExpiryReminder: 'Playlist Swap: Your Subscription expires in Two days',
+    FiveDayExpiryReminder:
+      'Playlist Swap: Your Subscription expires in Five days',
+  };
+>>>>>>> 8777fb59e156ca25f677100141cf11f5b75a3b13
