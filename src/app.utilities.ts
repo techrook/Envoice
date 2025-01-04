@@ -24,4 +24,10 @@ export class AppUtilities {
       ): string {
         return Buffer.from(data).toString(encoding);
       }
+      public static async validatePassword(
+        Incomingpassword: string,
+        userPassword: string,
+      ) {
+        return argon.verify(userPassword, Incomingpassword);
+      }
 }

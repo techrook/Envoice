@@ -1,5 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { UserSignUpDto } from './dto/auth.dto';
+import { UserSignUpDto,UserLoginDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -14,5 +14,10 @@ export class AuthController {
   @Post('register')
   register(@Body() dto: UserSignUpDto) {
     return this.authService.signUp(dto);
+  }
+
+  @Post('login')
+  async login(@Body() loginDto: UserLoginDto) {
+    return this.authService.login(loginDto);
   }
 }

@@ -9,4 +9,6 @@ export const CONSTANT = {
     AuthQ: 'auth-queue',
     onUserLogin: 'user.login',
     onPasswordReset: 'user.password.reset.success',
+    INCORRECT_CREDS: 'Incorrect Credentials',
+    MAIL_UNVERIFIED: 'Email has not been verified'
 }

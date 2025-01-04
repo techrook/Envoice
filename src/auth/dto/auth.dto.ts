@@ -25,6 +25,16 @@ export class UserSignUpDto {
     password: string;
   }
 
+  export class UserLoginDto {
+    @IsEmail({}, { message: 'Invalid email address' })
+    email: string;
+  
+    @IsString()
+    @IsNotEmpty({ message: 'Password is required' })
+    @MinLength(6, { message: 'Password must be at least 6 characters long' })
+    password: string;
+  }
+
   export class createUserDto {
     @IsString()
     username?: string;
