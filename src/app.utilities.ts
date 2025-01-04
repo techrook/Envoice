@@ -26,13 +26,12 @@ export class AppUtilities {
       ): string {
         return Buffer.from(data).toString(encoding);
       }
-<<<<<<< HEAD
       public static async validatePassword(
         Incomingpassword: string,
         userPassword: string,
       ) {
         return argon.verify(userPassword, Incomingpassword);
-=======
+      }
       public static generateToken(len?: number): string {
         return crypto.randomBytes(len || 32).toString('hex');
       }
@@ -49,6 +48,5 @@ export class AppUtilities {
       }
       public static readFile(filePath: string) {
         return fs.readFileSync(filePath, 'utf8');
->>>>>>> 8777fb59e156ca25f677100141cf11f5b75a3b13
       }
 }

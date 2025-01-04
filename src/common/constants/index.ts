@@ -9,13 +9,11 @@ export const CONSTANT = {
     AuthQ: 'auth-queue',
     onUserLogin: 'user.login',
     onPasswordReset: 'user.password.reset.success',
-<<<<<<< HEAD
     INCORRECT_CREDS: 'Incorrect Credentials',
-    MAIL_UNVERIFIED: 'Email has not been verified'
-}
-=======
+    MAIL_UNVERIFIED: 'Email has not been verified',
     OOPS: `Ooops! Something went wrong, this is not you!`,
 }
+
 
 export const MAIL = {
     noreply: 'noreply@playlistswap.ng',
@@ -34,4 +32,3 @@ export const MAIL = {
     FiveDayExpiryReminder:
       'Playlist Swap: Your Subscription expires in Five days',
   };
->>>>>>> 8777fb59e156ca25f677100141cf11f5b75a3b13

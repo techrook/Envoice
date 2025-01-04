@@ -8,9 +8,9 @@ import EventsManager from 'src/common/events/events.manager';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UserSignUpDto, UserLoginDto } from './dto/auth.dto';
 import { TokenUtil } from './jwttoken/token.util';
-
-
 import { PrismaClient } from '@prisma/client';
+
+    
 
 const {
     CREDS_TAKEN,
@@ -26,6 +26,7 @@ export class AuthService {
         private readonly prisma: PrismaClient,
         private usersService: UsersService,
         private eventsManager:EventsManager,
+        private readonly jwtService: JwtService
     ){
         
     }
@@ -71,9 +72,8 @@ export class AuthService {
 
       if (!isMatch) throw new UnauthorizedException(INCORRECT_CREDS);
 
-      if (!user.emailVerified) {
+      if (user.emailVerified === false)
         throw new UnauthorizedException(MAIL_UNVERIFIED);
-      }
 
       // Use TokenUtil to sign tokens
       const accessToken = TokenUtil.signAccessToken(this.jwtService, user.id);

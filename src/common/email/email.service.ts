@@ -10,8 +10,8 @@ export interface WaitlistOpts {
   username?: string;
   subject: string;
   content: string;
-}
-
+}   
+      
 @Injectable()
 export class EmailService {
   private basePath: string;
