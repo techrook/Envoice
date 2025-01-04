@@ -38,7 +38,8 @@ export class AuthService {
       const password = await AppUtilities.hashPassword(dto.password);
       const user = await this.usersService.registerUser(dto, password);
 
-      // this.eventsManager.onUserRegister(user);
+      this.eventsManager.onUserRegister(user);
+      
       return {
         message: CONFIRM_MAIL_SENT(dto.email),
       };

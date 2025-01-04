@@ -5,10 +5,17 @@ import {
   import {
     SignUpEventListener,
   } from './queue.listener';
+import { PrismaClient } from '@prisma/client';
+import { EmailService } from 'src/common/email/email.service';
 @Module({
     providers: [
-        SignUpConsumer,],
+        SignUpConsumer,
+        SignUpEventListener,
+      PrismaClient,
+      EmailService],
     
-    imports:[],
+    imports:[
+
+    ],
 })
 export class QueueModule {}
