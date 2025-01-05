@@ -52,6 +52,7 @@ export function validate(config: Record<string, unknown>) {
 export const configuration = () => ({
     port: parseInt(process.env.PORT, 10) || 3456,
     appName: process.env.APP_NAME || 'Envoice',
+    appRoot: process.cwd(),
     version: process.env.VERSION || '1.0',
     host:
     process.env.APP_HOST || `http://localhost:${process.env.PORT || 3456}`,
