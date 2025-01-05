@@ -15,18 +15,12 @@ export const CONSTANT = {
 
 export const MAIL = {
     noreply: 'noreply@playlistswap.ng',
-    waitListSubject: 'Welcome to Playlist Swap',
-    waitListFrom: 'The Swap Crew',
-    urlLogin: "PlaylistSwap Login: Here's the secure login link you requested",
-    passwordReset: 'Playlist Swap: Password  Reset',
+    waitListSubject: 'Welcome to Envoice App',
+    waitListFrom: 'The Envoice Team',
+    urlLogin: "Envoice Login: Here's the secure login link you requested",
+    passwordReset: 'Envoice: Password  Reset',
     confirmEmail: 'Envoice: Email Verification',
-    welcomeMail: 'PlaylistSwap: Welcome Onboard',
+    welcomeMail: 'Envoice: Welcome Onboard',
     passswordChange:
-      'PlaylistSwap Security: Your Password has been changed successfully',
-    subscriptionSuccessfulMail:
-      'Subscription Successful! Welcome to Playlist Swap',
-    subscriptionDeActivate: 'Subscription DeActivated',
-    TwoDayExpiryReminder: 'Playlist Swap: Your Subscription expires in Two days',
-    FiveDayExpiryReminder:
-      'Playlist Swap: Your Subscription expires in Five days',
+      'Envoice Security: Your Password has been changed successfully',
   };
