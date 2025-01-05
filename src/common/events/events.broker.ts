@@ -23,7 +23,6 @@ export class EventBroker {
   
     @OnEvent(onUserRegister)
     async handleUserRegister(event) {
-        console.log('event') 
       const user = event.payload;
       await this.authQ.add(sendConfirmationMail, {
         user,
