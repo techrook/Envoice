@@ -12,7 +12,7 @@ const {
 class EventsManager {
     constructor(private readonly eventEmitter: EventEmitter2) {}
     public onUserRegister(user: any) {
-      console.log('user', user)
+      console.log('Emitting event:', CONSTANT.onUserRegister, 'with payload:', user);
       return this.eventEmitter.emit(onUserRegister, new UserRegisterEvent(user));
     }
   

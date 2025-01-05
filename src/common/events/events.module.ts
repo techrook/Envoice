@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-// import { EventBroker } from './events.broker';
+import { EventBroker } from './events.broker';
 import EventsManager from './events.manager';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
@@ -12,7 +12,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
   ],
   providers: [
-    // EventBroker,
+    EventBroker,
     {
       provide: EventsManager,
       useFactory: (eventEmitter: EventEmitter2) =>
@@ -20,6 +20,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       inject: [EventEmitter2],
     },
   ],
-  exports: [EventsManager,],
+  exports: [EventsManager,EventBroker],
 })
 export class EventsManagerModule {}

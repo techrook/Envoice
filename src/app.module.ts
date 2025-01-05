@@ -8,6 +8,8 @@ import { UsersModule } from './users/users.module';
 import { EventsManagerModule } from './common/events/events.module';
 import { QueueModule } from './queue/queue.module';
 import { EmailModule } from './common/email/email.module';
+import { EmailService } from './common/email/email.service';
+import { BullConfigService } from 'config/bullConfigService';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -18,11 +20,12 @@ import { EmailModule } from './common/email/email.module';
   LoggerModule,
   PrismaModule,
   AuthModule,
+  BullConfigService,
   UsersModule,
   EventsManagerModule,
   QueueModule,
   EmailModule,],
   controllers: [],
-  providers: [],
+  providers: [EmailService, EventsManagerModule],
 })
 export class AppModule {}
