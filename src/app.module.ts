@@ -12,19 +12,21 @@ import { EmailService } from './common/email/email.service';
 import { BullConfigService } from 'config/bullConfigService';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-    load: [configuration],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
       validate,
-  }),
-  LoggerModule,
-  PrismaModule,
-  AuthModule,
-  BullConfigService,
-  UsersModule,
-  EventsManagerModule,
-  QueueModule,
-  EmailModule,],
+    }),
+    LoggerModule,
+    PrismaModule,
+    AuthModule,
+    BullConfigService,
+    UsersModule,
+    EventsManagerModule,
+    QueueModule,
+    EmailModule,
+  ],
   controllers: [],
   providers: [EmailService, EventsManagerModule],
 })

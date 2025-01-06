@@ -3,7 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { QueueModule } from 'src/queue/queue.module';
 import { CONSTANT } from 'src/common/constants';
-const { AuthQ, } = CONSTANT;
+const { AuthQ } = CONSTANT;
 
 @Global()
 @Module({
@@ -23,9 +23,7 @@ const { AuthQ, } = CONSTANT;
       inject: [ConfigService],
     }),
 
-    BullModule.registerQueue(
-      { name: AuthQ },
-    ),
+    BullModule.registerQueue({ name: AuthQ }),
     QueueModule,
   ],
   exports: [BullModule],

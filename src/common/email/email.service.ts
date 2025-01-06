@@ -23,12 +23,12 @@ export class EmailService {
     this.basePath = this.cfg.get('appRoot');
   }
 
-    /**
+  /**
    * Prep Html content
    */
-    private prepMailContent(filePath: string) {
-        return AppUtilities.readFile(`${this.basePath}/templates/${filePath}`);
-      }
+  private prepMailContent(filePath: string) {
+    return AppUtilities.readFile(`${this.basePath}/templates/${filePath}`);
+  }
 
   /**
    * Dispatch Mail to Email Address

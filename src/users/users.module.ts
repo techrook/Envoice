@@ -8,6 +8,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
   imports: [forwardRef(() => AuthModule)],
   controllers: [UsersController],
   providers: [UsersService, PrismaService],
-  exports:[UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}
