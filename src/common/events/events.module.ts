@@ -20,6 +20,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       inject: [EventEmitter2],
     },
   ],
-  exports: [EventsManager,EventBroker],
+  exports: [EventsManager, EventBroker],
 })
 export class EventsManagerModule {}

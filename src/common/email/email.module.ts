@@ -24,8 +24,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
         },
       }),
     }),
-
   ],
-  providers: [EmailService]
+  providers: [EmailService],
 })
 export class EmailModule {}

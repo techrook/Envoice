@@ -7,10 +7,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaClient } from '@prisma/client';
 
 @Module({
-  imports: [
-    forwardRef(() => UsersModule),],
+  imports: [forwardRef(() => UsersModule)],
   controllers: [AuthController],
-  providers: [AuthService, PrismaClient,],
-  exports: [AuthService]
+  providers: [AuthService, PrismaClient],
+  exports: [AuthService],
 })
 export class AuthModule {}

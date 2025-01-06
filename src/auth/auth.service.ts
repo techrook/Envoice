@@ -1,4 +1,8 @@
-import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CONSTANT } from 'src/common/constants';
@@ -8,29 +12,22 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { UserSignUpDto } from './dto/auth.dto';
 import { PrismaClient } from '@prisma/client';
 
-const {
-    CREDS_TAKEN,
-    USERNAME_TAKEN,
-    CONFIRM_MAIL_SENT
-  } = CONSTANT;
+const { CREDS_TAKEN, USERNAME_TAKEN, CONFIRM_MAIL_SENT } = CONSTANT;
 
 @Injectable()
 export class AuthService {
-    constructor (
-        private readonly prisma: PrismaClient,
-        private usersService: UsersService,
-        private readonly eventsManager:EventsManager,
-    ){
-        
-    }
-    /**
+  constructor(
+    private readonly prisma: PrismaClient,
+    private usersService: UsersService,
+    private readonly eventsManager: EventsManager,
+  ) {}
+  /**
    * User SignUp
    */
   async signUp(dto: UserSignUpDto) {
     try {
-      
-      let isExistingUser =  await this.usersService.findUserByEmail(dto.email);
-       if (isExistingUser) throw new ConflictException(CREDS_TAKEN);
+      let isExistingUser = await this.usersService.findUserByEmail(dto.email);
+      if (isExistingUser) throw new ConflictException(CREDS_TAKEN);
 
       isExistingUser = await this.usersService.findUserByUsername(dto.username);
       if (isExistingUser) throw new ConflictException(USERNAME_TAKEN);
@@ -39,7 +36,7 @@ export class AuthService {
       const user = await this.usersService.registerUser(dto, password);
 
       this.eventsManager.onUserRegister(user);
-      
+
       return {
         message: CONFIRM_MAIL_SENT(dto.email),
       };
