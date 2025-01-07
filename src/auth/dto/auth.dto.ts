@@ -35,6 +35,12 @@ export class UserSignUpDto {
     password: string;
   }
 
+  export class RefreshTokenDto {
+    @IsString()
+    refreshToken: string;
+  }
+
+
   export class createUserDto {
     @IsString()
     username?: string;

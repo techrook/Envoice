@@ -1,5 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { UserSignUpDto,UserLoginDto } from './dto/auth.dto';
+import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import { UserSignUpDto,UserLoginDto, RefreshTokenDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -20,4 +20,13 @@ export class AuthController {
   async login(@Body() loginDto: UserLoginDto) {
     return this.authService.login(loginDto);
   }
+
+  @Post('refresh-token')
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    const tokens = await this.authService.refreshToken(refreshTokenDto.refreshToken);
+    if (!tokens) throw new UnauthorizedException('Invalid refresh token');
+    return tokens;
+  }
+
+
 }

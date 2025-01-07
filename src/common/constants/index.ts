@@ -12,6 +12,10 @@ export const CONSTANT = {
     INCORRECT_CREDS: 'Incorrect Credentials',
     MAIL_UNVERIFIED: 'Email has not been verified',
     OOPS: `Ooops! Something went wrong, this is not you!`,
+    INVALID_REFRESH_TOKEN:'Invalid refresh token',
+    REFRESH_TOKEN_EXPIRED:'Refresh token expired',
+    REFRESH_TOKEN_NOTFOUND:'Refresh token not found',
+    REFRESH_TOKEN_NOTFORUSER:'Refresh token does not belong to the user'
 }
 
 
