@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as argon from 'argon2';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
+
 @Injectable()
 export class AppUtilities {
   public static async hashPassword(password: string): Promise<string> {
@@ -26,6 +27,14 @@ export class AppUtilities {
   ): string {
     return Buffer.from(data).toString(encoding);
   }
+
+  public static async validatePassword(
+    incomingPassword: string,
+    userPassword: string,
+  ): Promise<boolean> {
+    return argon.verify(userPassword, incomingPassword);
+  }
+
   public static generateToken(len?: number): string {
     return crypto.randomBytes(len || 32).toString('hex');
   }
@@ -40,7 +49,9 @@ export class AppUtilities {
       .update(token + (userId || ''))
       .digest('hex');
   }
-  public static readFile(filePath: string) {
+
+  public static readFile(filePath: string): string {
     return fs.readFileSync(filePath, 'utf8');
   }
 }
+

@@ -2,17 +2,30 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
 import EventsManager from 'src/common/events/events.manager';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { UserSignUpDto } from './dto/auth.dto';
+import { UserSignUpDto, UserLoginDto } from './dto/auth.dto';
+import { TokenUtil } from './jwttoken/token.util';
 import { PrismaClient } from '@prisma/client';
 
-const { CREDS_TAKEN, USERNAME_TAKEN, CONFIRM_MAIL_SENT } = CONSTANT;
+const {
+  CREDS_TAKEN,
+  USERNAME_TAKEN,
+  CONFIRM_MAIL_SENT,
+  INCORRECT_CREDS,
+  MAIL_UNVERIFIED,
+  INVALID_REFRESH_TOKEN,
+  REFRESH_TOKEN_EXPIRED,
+  REFRESH_TOKEN_NOTFOUND,
+  REFRESH_TOKEN_NOTFORUSER,
+} = CONSTANT;
 
 @Injectable()
 export class AuthService {
@@ -20,7 +33,9 @@ export class AuthService {
     private readonly prisma: PrismaClient,
     private usersService: UsersService,
     private readonly eventsManager: EventsManager,
+    private readonly jwtService: JwtService,
   ) {}
+
   /**
    * User SignUp
    */
@@ -46,5 +61,93 @@ export class AuthService {
       }
       throw error;
     }
+  }
+
+  /**
+   * User Login
+   */
+  async login(dto: UserLoginDto) {
+    try {
+      const user = await this.usersService.findUserByEmail(dto.email);
+      if (!user) throw new UnauthorizedException(INCORRECT_CREDS);
+
+      const isMatch = await AppUtilities.validatePassword(
+        dto.password,
+        user.password,
+      );
+
+      if (!isMatch) throw new UnauthorizedException(INCORRECT_CREDS);
+
+      if (!user.emailVerified) {
+        throw new UnauthorizedException(MAIL_UNVERIFIED);
+      }
+
+      const accessToken = TokenUtil.signAccessToken(this.jwtService, user.id);
+      const refreshToken = TokenUtil.signRefreshToken(this.jwtService, user.id);
+
+      await this.prisma.refreshToken.create({
+        data: {
+          token: refreshToken,
+          userId: user.id,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        },
+      });
+
+      return { accessToken, refreshToken };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new ForbiddenException(INCORRECT_CREDS);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Refresh Token
+   */
+  async refreshToken(refreshToken: string) {
+    let payload;
+    try {
+      payload = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+      });
+    } catch (err) {
+      throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
+    }
+
+    const storedToken = await this.prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+    });
+
+    if (!storedToken) {
+      throw new UnauthorizedException(REFRESH_TOKEN_NOTFOUND);
+    }
+
+    if (storedToken.userId !== payload.sub) {
+      throw new UnauthorizedException(REFRESH_TOKEN_NOTFORUSER);
+    }
+
+    if (new Date() > storedToken.expiresAt) {
+      throw new UnauthorizedException(REFRESH_TOKEN_EXPIRED);
+    }
+
+    const accessToken = TokenUtil.signAccessToken(this.jwtService, payload.sub);
+    const newRefreshToken = TokenUtil.signRefreshToken(
+      this.jwtService,
+      payload.sub,
+    );
+
+    await this.prisma.$transaction([
+      this.prisma.refreshToken.delete({ where: { token: refreshToken } }),
+      this.prisma.refreshToken.create({
+        data: {
+          token: newRefreshToken,
+          userId: payload.sub,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        },
+      }),
+    ]);
+
+    return { accessToken, refreshToken: newRefreshToken };
   }
 }
