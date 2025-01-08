@@ -5,6 +5,7 @@ export const CONSTANT = {
   CONFIRM_MAIL_SENT: (mail: string) =>
     `A confirmation email has been successfully sent to ${mail}. Please check your inbox and click the provided link to complete the process.`,
   sendConfirmationMail: 'confirmation.mail.request',
+  onEmailConfirmationSend: 'user.confirmation.mail.send',
   onPasswordChange: 'user.password.change.success',
   AuthQ: 'auth-queue',
   onUserLogin: 'user.login',
@@ -16,4 +17,16 @@ export const CONSTANT = {
   REFRESH_TOKEN_EXPIRED: 'Refresh token expired',
   REFRESH_TOKEN_NOTFOUND: 'Refresh token not found',
   REFRESH_TOKEN_NOTFORUSER: 'Refresh token does not belong to the user',
+};
+
+export const MAIL = {
+  noreply: 'noreply@playlistswap.ng',
+  waitListSubject: 'Welcome to Envoice App',
+  waitListFrom: 'The Envoice Team',
+  urlLogin: "Envoice Login: Here's the secure login link you requested",
+  passwordReset: 'Envoice: Password  Reset',
+  confirmEmail: 'Envoice: Email Verification',
+  welcomeMail: 'Envoice: Welcome Onboard',
+  passswordChange:
+    'Envoice Security: Your Password has been changed successfully',
 };

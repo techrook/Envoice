@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
+// import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
@@ -92,7 +92,12 @@ export class AuthService {
           expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
         },
       });
-
+      const userId = user.id;
+      this.eventsManager.onUserLogin({
+        userId,
+        accessToken,
+        refreshToken,
+      });
       return { accessToken, refreshToken };
     } catch (error) {
       if (error.code === 'P2025') {

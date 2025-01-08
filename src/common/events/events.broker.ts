@@ -8,8 +8,7 @@ const {
   sendConfirmationMail,
   onEmailConfirmationSend,
   AuthQ,
-  onPasswordChange,
-  onPasswordReset,
+  onUserLogin,
 } = CONSTANT;
 
 export class EventBroker {
@@ -34,4 +33,21 @@ export class EventBroker {
       user,
     });
   }
+
+  @OnEvent(onUserLogin)
+  async handleUserLogin(event) {
+    const { userId, accessToken, refreshToken } = event.payload;
+    await this.authQ.add(onUserLogin, {
+      userId,
+      accessToken,
+      refreshToken,
+    });
+  }
+
+  // @OnEvent(onUserLogin)
+  // handleUserLogin(event) {
+  //   this.authQ.add(onUserLogin, {
+  //     ...event.payload,
+  //   });
+  // }
 }

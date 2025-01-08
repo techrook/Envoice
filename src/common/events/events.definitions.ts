@@ -14,3 +14,13 @@ export class UserRegisterEvent {
 export class UserConfirmedMailEvent {
   constructor(public payload: { token: string; userId: string }) {}
 }
+
+export class UserLoginEvent {
+  constructor(
+    public payload: {
+      userId: any;
+      accessToken?: string;
+      refreshToken?: string;
+    },
+  ) {}
+}

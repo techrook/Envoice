@@ -8,8 +8,6 @@ import { CONSTANT } from 'src/common/constants';
 import { EmailService } from 'src/common/email/email.service';
 const {
   sendConfirmationMail,
-  onPasswordChange,
-  onPasswordReset,
   AuthQ,
   onUserLogin,
 } = CONSTANT;
@@ -33,6 +31,18 @@ export class SignUpConsumer extends IBaseWoker {
         break;
       }
 
+      case onUserLogin: {
+        const { userId, accessToken, refreshToken } = job.data;
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: {
+            lastLogin: new Date().toISOString(),
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          },
+        });
+        break;
+      }
       default: {
         this.log.warn(`Unknown job name: ${job.name}`);
       }

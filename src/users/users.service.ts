@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { createUserDto, UserSignUpDto } from 'src/auth/dto/auth.dto';
+import { CreateUserDto, UserSignUpDto } from 'src/auth/dto/auth.dto';
 import { CrudService } from 'src/common/database/crud.service';
 import { UsersMapType } from './users.mapType';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -29,7 +29,7 @@ export class UsersService extends CrudService<
   /**
    * Create User in DB
    */
-  async createUser(dto: createUserDto) {
+  async createUser(dto: CreateUserDto) {
     return await this.prisma.user.create({
       data: {
         ...dto,

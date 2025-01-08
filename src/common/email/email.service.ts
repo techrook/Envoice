@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { MAIL, CONSTANT } from '../constants';
+import { CONSTANT,MAIL } from '../constants';
 import { AppUtilities } from 'src/app.utilities';
 import { User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
