@@ -8,8 +8,6 @@ import { CONSTANT } from 'src/common/constants';
 import { EmailService } from 'src/common/email/email.service';
 const {
   sendConfirmationMail,
-  onPasswordChange,
-  onPasswordReset,
   AuthQ,
   onUserLogin,
 } = CONSTANT;
@@ -33,6 +31,7 @@ export class SignUpConsumer extends IBaseWoker {
         break;
       }
 
+      
       default: {
         this.log.warn(`Unknown job name: ${job.name}`);
       }
