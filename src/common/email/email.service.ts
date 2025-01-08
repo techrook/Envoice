@@ -2,9 +2,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CONSTANT,MAIL } from '../constants';
 import { AppUtilities } from 'src/app.utilities';
-import { User } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import AppLogger from '../log/logger.config';
+
 export interface WaitlistOpts {
   email: string;
   username?: string;
@@ -19,6 +20,7 @@ export class EmailService {
     private mailerService: MailerService,
     private cfg: ConfigService,
     private logger: AppLogger,
+    private readonly prisma: PrismaClient,
   ) {
     this.basePath = this.cfg.get('appRoot');
   }
@@ -67,8 +69,12 @@ export class EmailService {
       throw new BadRequestException({ status: 403, error: CONSTANT.OOPS });
     }
   }
-  private generateEmailConfirmationToken(userId: string): string {
+  private async generateEmailConfirmationToken(userId: string): Promise<string> {
     const access_token = AppUtilities.generateToken(32);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { verifiedToken: access_token },
+    });
     return access_token;
   }
 }

@@ -12,7 +12,7 @@ export class UserRegisterEvent {
 }
 
 export class UserConfirmedMailEvent {
-  constructor(public payload: { token: string; userId: string }) {}
+  constructor(public payload: { userId: string }) {}
 }
 
 export class UserLoginEvent {

@@ -155,4 +155,26 @@ export class AuthService {
 
     return { accessToken, refreshToken: newRefreshToken };
   }
+  async confirmEmail(token: string) {
+    const userId = await this.verifyToken(token);
+
+    this.eventsManager.onEmailConfirmation(userId);
+    const accessToken = TokenUtil.signAccessToken(this.jwtService, userId);
+    const refreshToken = TokenUtil.signRefreshToken(this.jwtService, userId);
+
+    return { accessToken, refreshToken };
+    
+  }
+
+  async verifyToken(token: string) {
+    const user = await this.prisma.user.findFirst({
+      where: { verifiedToken: token },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    return user.id;
+  }
 }
