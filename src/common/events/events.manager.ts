@@ -1,9 +1,9 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CONSTANT } from '../constants/index';
-import { UserRegisterEvent,UserLoginEvent  } from './events.definitions';
+import { UserRegisterEvent,UserLoginEvent, UserConfirmedMailEvent  } from './events.definitions';
 // import { User } from '@prisma/client';
 
-const { onUserRegister, onUserLogin } = CONSTANT;
+const { onUserRegister, onUserLogin, onEmailConfirmation } = CONSTANT;
 class EventsManager {
   constructor(private readonly eventEmitter: EventEmitter2) {}
   public onUserRegister(user: any) {
@@ -25,6 +25,12 @@ class EventsManager {
       refreshToken,
     }));
   }
+  public onEmailConfirmation(userId: string) {
+    this.eventEmitter.emit(
+      onEmailConfirmation,
+      new UserConfirmedMailEvent({ userId }),
+    );
+  } 
 }
 
 export default EventsManager;

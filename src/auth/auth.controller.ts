@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UnauthorizedException } from '@nestjs/common';
 import { UserSignUpDto,UserLoginDto, RefreshTokenDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -28,5 +28,10 @@ export class AuthController {
     return tokens;
   }
 
+
+  @Get('confirm-email')
+  confirmEmail(@Query('token') token: string) {
+    return this.authService.confirmEmail(token);
+  }
 
 }

@@ -43,6 +43,17 @@ export class SignUpConsumer extends IBaseWoker {
         });
         break;
       }
+      case 'emailConfirmed': {
+        const { userId } = job.data;
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: {
+            emailVerified: true,
+            verifiedToken:null,
+          },
+        });
+        break;
+      }
       default: {
         this.log.warn(`Unknown job name: ${job.name}`);
       }

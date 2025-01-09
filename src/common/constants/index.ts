@@ -6,6 +6,7 @@ export const CONSTANT = {
     `A confirmation email has been successfully sent to ${mail}. Please check your inbox and click the provided link to complete the process.`,
   sendConfirmationMail: 'confirmation.mail.request',
   onEmailConfirmationSend: 'user.confirmation.mail.send',
+  onEmailConfirmation: 'user.confirmed.mail',
   onPasswordChange: 'user.password.change.success',
   AuthQ: 'auth-queue',
   onUserLogin: 'user.login',
@@ -20,7 +21,7 @@ export const CONSTANT = {
 };
 
 export const MAIL = {
-  noreply: 'noreply@playlistswap.ng',
+  noreply: 'noreply@Envoice.ng',
   waitListSubject: 'Welcome to Envoice App',
   waitListFrom: 'The Envoice Team',
   urlLogin: "Envoice Login: Here's the secure login link you requested",

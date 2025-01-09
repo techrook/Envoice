@@ -9,6 +9,7 @@ const {
   onEmailConfirmationSend,
   AuthQ,
   onUserLogin,
+  onEmailConfirmation
 } = CONSTANT;
 
 export class EventBroker {
@@ -44,10 +45,12 @@ export class EventBroker {
     });
   }
 
-  // @OnEvent(onUserLogin)
-  // handleUserLogin(event) {
-  //   this.authQ.add(onUserLogin, {
-  //     ...event.payload,
-  //   });
-  // }
+  @OnEvent(onEmailConfirmation)
+  async handleEmailConfirmation(event) {
+    const { userId, token } = event.payload;
+    await this.authQ.add('emailConfirmed', {
+      userId,
+      token,
+    });
+  }
 }
