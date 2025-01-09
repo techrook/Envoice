@@ -30,14 +30,15 @@ export class EmailService {
    * Prep Html content
    */
   private prepMailContent(filePath: string) {
-    return AppUtilities.readFile(`${this.basePath}/templates/${filePath}`);
+    return AppUtilities.readFile(`${process.cwd()}/templates/${filePath}`);
   }
 
   /**
    * Dispatch Mail to Email Address
    */
   private async dispatchMail(options: WaitlistOpts) {
-    await this.mailerService.sendMail({
+    console.log(options);
+    return await this.mailerService.sendMail({
       to: options.email,
       from: `${MAIL.waitListFrom} <${MAIL.noreply}>`,
       subject: options.subject,
@@ -50,10 +51,8 @@ export class EmailService {
 
   async sendConfirmationEmail(user: User) {
     try {
-      const token = this.generateEmailConfirmationToken(user.id);
-
+      const token = await this.generateEmailConfirmationToken(user.id);
       const confirmUrl = `${this.cfg.get('app')}/auth/login?token=${token}`;
-
       const htmlTemplate = this.prepMailContent('confirmEmail.html');
       const htmlContent = htmlTemplate.replace('{{confirmUrl}}', confirmUrl);
 

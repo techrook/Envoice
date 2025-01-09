@@ -21,7 +21,7 @@ export const CONSTANT = {
 };
 
 export const MAIL = {
-  noreply: 'noreply@playlistswap.ng',
+  noreply: 'noreply@Envoice.ng',
   waitListSubject: 'Welcome to Envoice App',
   waitListFrom: 'The Envoice Team',
   urlLogin: "Envoice Login: Here's the secure login link you requested",
