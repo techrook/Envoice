@@ -2,9 +2,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CONSTANT,MAIL } from '../constants';
 import { AppUtilities } from 'src/app.utilities';
-import { PrismaClient, User } from '@prisma/client';
+import {  User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import AppLogger from '../log/logger.config';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 export interface WaitlistOpts {
   email: string;
@@ -20,7 +21,7 @@ export class EmailService {
     private mailerService: MailerService,
     private cfg: ConfigService,
     private logger: AppLogger,
-    private readonly prisma: PrismaClient,
+    private  prisma:PrismaService,
   ) {
     this.basePath = this.cfg.get('appRoot');
   }
