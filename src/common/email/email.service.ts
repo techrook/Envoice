@@ -1,17 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { MAIL, CONSTANT } from '../constants';
+import { CONSTANT,MAIL } from '../constants';
 import { AppUtilities } from 'src/app.utilities';
-import { User } from '@prisma/client';
+import {  User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import AppLogger from '../log/logger.config';
+import { PrismaService } from 'src/prisma/prisma.service';
+
 export interface WaitlistOpts {
   email: string;
   username?: string;
   subject: string;
   content: string;
-}
-
+}   
+      
 @Injectable()
 export class EmailService {
   private basePath: string;
@@ -19,22 +21,24 @@ export class EmailService {
     private mailerService: MailerService,
     private cfg: ConfigService,
     private logger: AppLogger,
+    private  prisma:PrismaService,
   ) {
     this.basePath = this.cfg.get('appRoot');
   }
 
-    /**
+  /**
    * Prep Html content
    */
-    private prepMailContent(filePath: string) {
-        return AppUtilities.readFile(`${this.basePath}/templates/${filePath}`);
-      }
+  private prepMailContent(filePath: string) {
+    return AppUtilities.readFile(`${process.cwd()}/templates/${filePath}`);
+  }
 
   /**
    * Dispatch Mail to Email Address
    */
   private async dispatchMail(options: WaitlistOpts) {
-    await this.mailerService.sendMail({
+    console.log(options);
+    return await this.mailerService.sendMail({
       to: options.email,
       from: `${MAIL.waitListFrom} <${MAIL.noreply}>`,
       subject: options.subject,
@@ -47,10 +51,8 @@ export class EmailService {
 
   async sendConfirmationEmail(user: User) {
     try {
-      const token = this.generateEmailConfirmationToken(user.id);
-
+      const token = await this.generateEmailConfirmationToken(user.id);
       const confirmUrl = `${this.cfg.get('app')}/auth/login?token=${token}`;
-
       const htmlTemplate = this.prepMailContent('confirmEmail.html');
       const htmlContent = htmlTemplate.replace('{{confirmUrl}}', confirmUrl);
 
@@ -67,8 +69,12 @@ export class EmailService {
       throw new BadRequestException({ status: 403, error: CONSTANT.OOPS });
     }
   }
-  private generateEmailConfirmationToken(userId: string): string {
+  private async generateEmailConfirmationToken(userId: string): Promise<string> {
     const access_token = AppUtilities.generateToken(32);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { verifiedToken: access_token },
+    });
     return access_token;
   }
 }

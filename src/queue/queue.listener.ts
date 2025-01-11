@@ -9,5 +9,3 @@ export class SignUpEventListener extends IListenToEvents {
     super(log);
   }
 }
-
-

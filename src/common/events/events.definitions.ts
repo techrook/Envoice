@@ -1,11 +1,9 @@
 import { User } from '@prisma/client';
-import {Priority} from './events.interface'
+import { Priority } from './events.interface';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { CONSTANT } from 'src/common/constants';
-
-
 
 export class UserRegisterEvent {
   constructor(
@@ -14,6 +12,15 @@ export class UserRegisterEvent {
 }
 
 export class UserConfirmedMailEvent {
-  constructor(public payload: { token: string; userId: string }) {}
+  constructor(public payload: { userId: string }) {}
 }
 
+export class UserLoginEvent {
+  constructor(
+    public payload: {
+      userId: any;
+      accessToken?: string;
+      refreshToken?: string;
+    },
+  ) {}
+}
