@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { CONSTANT,MAIL } from '../constants';
+import { CONSTANT, MAIL } from '../constants';
 import { AppUtilities } from 'src/app.utilities';
-import {  User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import AppLogger from '../log/logger.config';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -12,43 +12,43 @@ export interface WaitlistOpts {
   username?: string;
   subject: string;
   content: string;
-}   
-      
+}
+
 @Injectable()
 export class EmailService {
   private basePath: string;
+
   constructor(
     private mailerService: MailerService,
     private cfg: ConfigService,
     private logger: AppLogger,
-    private  prisma:PrismaService,
+    private prisma: PrismaService,
   ) {
     this.basePath = this.cfg.get('appRoot');
   }
 
   /**
-   * Prep Html content
+   * Read and prepare email HTML template
    */
-  private prepMailContent(filePath: string) {
+  private prepMailContent(filePath: string): string {
     return AppUtilities.readFile(`${process.cwd()}/templates/${filePath}`);
   }
 
   /**
-   * Dispatch Mail to Email Address
+   * Dispatch mail to recipient
    */
   private async dispatchMail(options: WaitlistOpts) {
-    console.log(options);
     return await this.mailerService.sendMail({
       to: options.email,
-      from: `${MAIL.waitListFrom} <${MAIL.noreply}>`,
+      from: `${MAIL.noreply}`, // Customize sender details
       subject: options.subject,
       html: options.content,
     });
   }
-  /**
-   * Send Confirmation Email
-   */
 
+  /**
+   * Send confirmation email to user
+   */
   async sendConfirmationEmail(user: User) {
     try {
       const token = await this.generateEmailConfirmationToken(user.id);
@@ -69,12 +69,16 @@ export class EmailService {
       throw new BadRequestException({ status: 403, error: CONSTANT.OOPS });
     }
   }
+
+  /**
+   * Generate email confirmation token
+   */
   private async generateEmailConfirmationToken(userId: string): Promise<string> {
-    const access_token = AppUtilities.generateToken(32);
+    const accessToken = AppUtilities.generateToken(32);
     await this.prisma.user.update({
       where: { id: userId },
-      data: { verifiedToken: access_token },
+      data: { verifiedToken: accessToken },
     });
-    return access_token;
+    return accessToken;
   }
 }
