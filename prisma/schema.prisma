@@ -22,6 +22,10 @@ model User {
   refresh_token String?
   verifiedToken String? 
 
+
+  provider      String?  // Added field for social login provider
+  providerId    String? 
+  
   lastLogin     DateTime?
   emailVerified Boolean          @default(false)
   createdAt     DateTime         @default(now())

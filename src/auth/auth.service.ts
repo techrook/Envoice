@@ -184,20 +184,35 @@ export class AuthService {
     });
   
     if (!existingUser) {
-      // Register the user if they don't already exist
+      // Register the user if they don't exist
       const newUser = await this.prisma.user.create({
         data: {
           email: user.email,
-          username: user.displayName, // You might want to generate a unique username
+          username: user.displayName || this.generateUniqueUsername(user.email),
+          emailVerified: true,
           provider: user.provider,
           providerId: user.providerId,
         },
       });
   
       return this.generateTokens(newUser.id);
+     
     }
   
     // User exists, generate tokens
     return this.generateTokens(existingUser.id);
+  }
+
+  private generateTokens(userId: string): { accessToken: string; refreshToken: string } {
+    // Implement token generation logic here
+    return {
+      accessToken: TokenUtil.signAccessToken(this.jwtService,userId),
+      refreshToken: TokenUtil.signRefreshToken(this.jwtService,userId),
+    };
+  }
+
+  private generateUniqueUsername(email: string): string {
+    const username = email.split('@')[0];
+    return `${username}_${Math.floor(Math.random() * 1000)}`;
   }
 }
