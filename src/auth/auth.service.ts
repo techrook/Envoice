@@ -177,4 +177,27 @@ export class AuthService {
 
     return user.id;
   }
+
+  async socialLogin(user: any) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: user.email },
+    });
+  
+    if (!existingUser) {
+      // Register the user if they don't already exist
+      const newUser = await this.prisma.user.create({
+        data: {
+          email: user.email,
+          username: user.displayName, // You might want to generate a unique username
+          provider: user.provider,
+          providerId: user.providerId,
+        },
+      });
+  
+      return this.generateTokens(newUser.id);
+    }
+  
+    // User exists, generate tokens
+    return this.generateTokens(existingUser.id);
+  }
 }
