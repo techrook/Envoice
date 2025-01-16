@@ -7,10 +7,14 @@ const { onUserRegister, onUserLogin, onEmailConfirmation } = CONSTANT;
 class EventsManager {
   constructor(private readonly eventEmitter: EventEmitter2) {}
   public onUserRegister(user: any) {
+    console.log(onUserRegister);
     return this.eventEmitter.emit(onUserRegister, new UserRegisterEvent(user));
+    
   }
 
   public onEmailConfirmationSend(user: any) {
+    console.log(onEmailConfirmation);
+    
     return this.eventEmitter.emit(onUserRegister, new UserRegisterEvent(user));
   }
 
@@ -26,6 +30,8 @@ class EventsManager {
     }));
   }
   public onEmailConfirmation(userId: string) {
+    console.log(onEmailConfirmation);
+    
     this.eventEmitter.emit(
       onEmailConfirmation,
       new UserConfirmedMailEvent({ userId }),

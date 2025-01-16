@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-// import { PrismaService } from 'src/prisma/prisma.service';
+//irt { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
@@ -35,7 +35,6 @@ export class AuthService {
     private readonly eventsManager: EventsManager,
     private readonly jwtService: JwtService,
   ) {}
-
   /**
    * User SignUp
    */
@@ -49,10 +48,9 @@ export class AuthService {
 
       const password = await AppUtilities.hashPassword(dto.password);
       const user = await this.usersService.registerUser(dto, password);
-      
+       
       this.eventsManager.onUserRegister(user);
-
-      return {
+       return {
         message: CONFIRM_MAIL_SENT(dto.email),
       };
     } catch (error) {

@@ -23,7 +23,7 @@ export class UsersService extends CrudService<
     return await this.prisma.user.findFirst({
       where: {
         [dto.field]: dto.value,
-      },
+      },      
     });
   }
   /**
