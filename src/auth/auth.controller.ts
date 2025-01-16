@@ -35,16 +35,10 @@ export class AuthController {
     return this.authService.confirmEmail(token);
   }
 
-
-  @Get('twitter')
-  @UseGuards(AuthGuard('twitter'))
-  async twitterAuth() {
-    // Initiates Twitter OAuth
-  }
-
-  @Get('twitter/callback')
-  @UseGuards(AuthGuard('twitter'))
-  async twitterAuthRedirect(@Req() req) {
-    return this.authService.socialLogin(req.user);
-  }
+  // @Get('/callback')
+  // @UseGuards(AuthGuard('twitter'))
+  // async twitterAuthRedirect(@Req() req) {
+  //   console.log(req.user);
+  //   return this.authService.socialLogin(req.user);
+  // }
 }

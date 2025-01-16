@@ -178,41 +178,47 @@ export class AuthService {
     return user.id;
   }
 
-  async socialLogin(user: any) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: user.email },
-    });
+  // async socialLogin(user: any) {
+  //   const existingUser = await this.prisma.user.findUnique({
+  //     where: { email: user.email },
+  //   });
   
-    if (!existingUser) {
-      // Register the user if they don't exist
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: user.email,
-          username: user.displayName || this.generateUniqueUsername(user.email),
-          emailVerified: true,
-          provider: user.provider,
-          providerId: user.providerId,
-        },
-      });
+  //   if (!existingUser) {
+  //     // Register the user if they don't exist
+  //     const newUser = await this.prisma.user.create({
+  //       data: {
+  //         email: user.email,
+  //         username: user.displayName || this.generateUniqueUsername(user.email),
+  //         emailVerified: true,
+  //         provider: user.provider,
+  //         providerId: user.providerId,
+  //       },
+  //     });
   
-      return this.generateTokens(newUser.id);
+  //     return this.generateTokens(newUser.id);
      
-    }
+  //   }
   
-    // User exists, generate tokens
-    return this.generateTokens(existingUser.id);
-  }
+  //   // User exists, generate tokens
+  //   return this.generateTokens(existingUser.id);
+  // }
+  // private async generateTokens(userId: string) {
+  //   const accessToken = TokenUtil.signAccessToken(this.jwtService, userId);
+  //   const refreshToken = TokenUtil.signRefreshToken(this.jwtService, userId);
+  
+  //   await this.prisma.refreshToken.create({
+  //     data: {
+  //       token: refreshToken,
+  //       userId,
+  //       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+  //     },
+  //   });
+  
+  //   return { accessToken, refreshToken };
+  // }
 
-  private generateTokens(userId: string): { accessToken: string; refreshToken: string } {
-    // Implement token generation logic here
-    return {
-      accessToken: TokenUtil.signAccessToken(this.jwtService,userId),
-      refreshToken: TokenUtil.signRefreshToken(this.jwtService,userId),
-    };
-  }
-
-  private generateUniqueUsername(email: string): string {
-    const username = email.split('@')[0];
-    return `${username}_${Math.floor(Math.random() * 1000)}`;
-  }
+  // private generateUniqueUsername(email: string): string {
+  //   const username = email.split('@')[0];
+  //   return `${username}_${Math.floor(Math.random() * 1000)}`;
+  // }
 }
