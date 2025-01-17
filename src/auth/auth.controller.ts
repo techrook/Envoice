@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Query, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { UserSignUpDto,UserLoginDto, RefreshTokenDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -34,4 +35,10 @@ export class AuthController {
     return this.authService.confirmEmail(token);
   }
 
+  // @Get('/callback')
+  // @UseGuards(AuthGuard('twitter'))
+  // async twitterAuthRedirect(@Req() req) {
+  //   console.log(req.user);
+  //   return this.authService.socialLogin(req.user);
+  // }
 }
