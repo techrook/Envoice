@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Post, Query, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { UserSignUpDto,UserLoginDto, RefreshTokenDto } from './dto/auth.dto';
+import { Body, Controller, Get, Param, Post, Query, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { UserSignUpDto,UserLoginDto, RefreshTokenDto,resendConfirmationMailDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { PasswordFieldsDto } from './dto/password.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -33,6 +34,16 @@ export class AuthController {
   @Get('confirm-email')
   confirmEmail(@Query('token') token: string) {
     return this.authService.confirmEmail(token);
+  }
+
+  @Post('request-reset-password')
+  requestPasswordReset(@Body() dto: resendConfirmationMailDto) {
+    return this.authService.requestPasswordReset(dto);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() dto: PasswordFieldsDto, @Param('token') token: string) {
+    return this.authService.resetPassword({ ...dto, token });
   }
 
   // @Get('/callback')

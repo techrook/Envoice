@@ -176,6 +176,38 @@ export class AuthService {
     return user.id;
   }
 
+
+  async requestPasswordReset(dto: resendConfirmationMailDto) {
+    const user = await this.usersService.findUserByEmail(dto.email);
+
+    if (!user) {
+      throw new UnauthorizedException(UNAUTHORIZED);
+      this.logger.threat(
+        'FATAL: USER REQUESTED FOR LOGIN-URL-LINK BUT EMAIL NOT EXIST: THREAT',
+      );
+    }
+
+    this.eventsManager.onPasswordReset(user, QueuePriority.level1());
+    return RESET_MAIL(dto.email);
+  }
+
+  async resetPassword(dto: resetPasswordDto) {
+    const isUser = await this.tokenService.verifyToken(
+      dto.token,
+      tokenType.reset_password,
+    );
+
+    if (!isUser) throw new UnauthorizedException(UNAUTHORIZED);
+
+    return await this.updatePassword(
+      {
+        confirmNewPassword: dto.confirmNewPassword,
+        newPassword: dto.newPassword,
+      },
+      isUser,
+    );
+  }
+
   // async socialLogin(user: any) {
   //   const existingUser = await this.prisma.user.findUnique({
   //     where: { email: user.email },
