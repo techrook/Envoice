@@ -84,9 +84,10 @@ export class CreateUserDto {
   @IsString()
   @MinLength(6)
   password: string;
+
 }
 export class resendConfirmationMailDto {
-  @IsString()
-  @IsEmail()
-  email: string;
+@IsString()
+@IsEmail()
+email: string;
 }

@@ -11,14 +11,17 @@ import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
 import EventsManager from 'src/common/events/events.manager';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { UserSignUpDto, UserLoginDto } from './dto/auth.dto';
+import { UserSignUpDto, UserLoginDto, resendConfirmationMailDto } from './dto/auth.dto';
 import { TokenUtil } from './jwttoken/token.util';
 import { PrismaClient } from '@prisma/client';
+import { QueuePriority } from 'src/common/events/events.interface';
 
 const {
   CREDS_TAKEN,
   USERNAME_TAKEN,
   CONFIRM_MAIL_SENT,
+  RESET_MAIL,
+  USER_NOT_FOUND,
   INCORRECT_CREDS,
   MAIL_UNVERIFIED,
   INVALID_REFRESH_TOKEN,
@@ -181,10 +184,7 @@ export class AuthService {
     const user = await this.usersService.findUserByEmail(dto.email);
 
     if (!user) {
-      throw new UnauthorizedException(UNAUTHORIZED);
-      this.logger.threat(
-        'FATAL: USER REQUESTED FOR LOGIN-URL-LINK BUT EMAIL NOT EXIST: THREAT',
-      );
+      throw new UnauthorizedException(USER_NOT_FOUND);
     }
 
     this.eventsManager.onPasswordReset(user, QueuePriority.level1());

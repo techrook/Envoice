@@ -24,3 +24,7 @@ export class UserLoginEvent {
     },
   ) {}
 }
+
+export class PasswordResetEvent {
+  constructor(public payload: { user: User; priority: Priority }) {}
+}
