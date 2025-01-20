@@ -20,12 +20,16 @@ export const CONSTANT = {
   REFRESH_TOKEN_NOTFORUSER: 'Refresh token does not belong to the user',
   BUSINESS_PROFILE_EXISTS:'Business profile already exists',
   BUSINESS_PROFILE_NOTFOUND:'Business profile not found',
-  BUSINESS_PROFILE_REQUIRED:'You must have a business profile to create clients',
+  BUSINESS_PROFILE_REQUIRED:'You must have a business profile to create client or invoice',
   BUSINESS_PROFILE_REQUIRED_FOR_VIEWING:'You must have a business profile to view clients',
   CLIENT_UPDATE_FORBIDDEN : 'You are not allowed to update this client',
   CLIENT_NOT_FOUND :'Client not found',
   CLIENT_DELETE_FORBIDDEN:'You are not allowed to delete this client',
-
+  CLIENT_CREATE_FORBIDDEN: 'You are not allowed to create an invoice for this client.',
+  INVOICE_NOT_FOUND: 'Invoice not found or access denied.',
+  INVOICE_UPDATE_FORBIDDEN: 'You are not allowed to update this invoice.',
+  INVOICE_DELETE_FORBIDDEN: 'You are not allowed to delete this invoice.',
+  INVOICE_DELETE_SUCCESS: 'Invoice deleted successfully.',
 };
 
 export const MAIL = {
