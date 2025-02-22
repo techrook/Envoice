@@ -81,4 +81,55 @@ export class EmailService {
     });
     return accessToken;
   }
+
+  /**
+   * Send password reset email to user
+   */
+  async sendPasswordReset(user: User) {
+    try {
+      const token = await this.tokenService.generateToken(
+        user.id,
+        tokenType.reset_password,
+      );
+
+      const resetUrl = `${this.cfg.get('app')}/auth/change-password?token=${token.access_token}`;
+
+      const htmlTemplate = this.prepMailContent('reqPasswordReset.html');
+      const htmlContent = htmlTemplate
+        .replace('{{resetUrl}}', resetUrl)
+        .replace('{{username}}', user.username);
+
+      const opts = {
+        subject: MAIL.passwordReset,
+        content: htmlContent,
+        ...user,
+      };
+
+      await this.dispatchMail(opts);
+    } catch (err) {
+      this.logger.error(err);
+      throw new BadRequestException({ status: 403, error: CONSTANT.OOPs });
+    }
+  }
+  async notifyUserPasswordChange(user: User) {
+    try {
+      const htmlTemplate = this.prepMailContent('passChangeSuccess.html');
+      const htmlContent = htmlTemplate.replace(
+        '{{username}}',
+        AppUtilities.capitalizeFirstLetter(user.username),
+      );
+
+      const opts = {
+        email: user.email,
+        username: user.username,
+        subject: MAIL.passswordChange,
+        content: htmlContent,
+      };
+
+      await this.dispatchMail(opts);
+    } catch (err) {
+      this.logger.error(err);
+      throw new BadRequestException({ status: 403, error: CONSTANT.OOPs });
+    }
+  }
 }

@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { PasswordFieldsDto } from './password.dto';
 
 export class UserSignUpDto {
   @ApiProperty({ example: 'john_doe', description: 'Username of the user' })
@@ -90,4 +91,8 @@ export class resendConfirmationMailDto {
 @IsString()
 @IsEmail()
 email: string;
+}    
+export class resetPasswordDto extends PasswordFieldsDto {
+  @IsString()
+  token: string;
 }

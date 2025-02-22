@@ -2,6 +2,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  NotAcceptableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -11,10 +12,11 @@ import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
 import EventsManager from 'src/common/events/events.manager';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { UserSignUpDto, UserLoginDto, resendConfirmationMailDto } from './dto/auth.dto';
+import { UserSignUpDto, UserLoginDto, resendConfirmationMailDto, resetPasswordDto } from './dto/auth.dto';
 import { TokenUtil } from './jwttoken/token.util';
 import { PrismaClient } from '@prisma/client';
 import { QueuePriority } from 'src/common/events/events.interface';
+import { UpdatePasswordDto } from './dto/password.dto';
 
 const {
   CREDS_TAKEN,
@@ -28,6 +30,9 @@ const {
   REFRESH_TOKEN_EXPIRED,
   REFRESH_TOKEN_NOTFOUND,
   REFRESH_TOKEN_NOTFORUSER,
+  UNAUTHORIZED,
+  PASSWORD_NOT_MATCH,
+  PASSWORD_CHANGED,
 } = CONSTANT;
 
 @Injectable()
@@ -192,13 +197,13 @@ export class AuthService {
   }
 
   async resetPassword(dto: resetPasswordDto) {
-    const isUser = await this.tokenService.verifyToken(
+    const isUser = await this.verifyToken(
       dto.token,
-      tokenType.reset_password,
     );
 
     if (!isUser) throw new UnauthorizedException(UNAUTHORIZED);
 
+   
     return await this.updatePassword(
       {
         confirmNewPassword: dto.confirmNewPassword,
@@ -206,6 +211,37 @@ export class AuthService {
       },
       isUser,
     );
+  }
+
+  private async updatePassword(dto: UpdatePasswordDto, id: string) {
+    const isMatch = AppUtilities.compareString(
+      dto.newPassword,
+      dto.confirmNewPassword,
+    );
+
+    if (!isMatch) throw new NotAcceptableException(PASSWORD_NOT_MATCH);
+
+    if (id) {
+      const password = await AppUtilities.hashPassword(dto.newPassword);
+      const updatedUser = await this.prisma.user.update({
+        where: {
+          id,
+        },
+        data: {
+          password: password,
+        },
+      });
+
+      updatedUser
+        ? this.eventsManager.onPasswordChange(
+            updatedUser,
+            QueuePriority.level1(),
+          )
+        : null;
+      return {
+        message: PASSWORD_CHANGED,
+      };
+    }
   }
 
   // async socialLogin(user: any) {

@@ -27,7 +27,9 @@ export const CONSTANT = {
   CLIENT_UPDATE_FORBIDDEN : 'You are not allowed to update this client',
   CLIENT_NOT_FOUND :'Client not found',
   CLIENT_DELETE_FORBIDDEN:'You are not allowed to delete this client',
-
+  UNAUTHORIZED: 'Unauthorized',
+  PASSWORD_NOT_MATCH: 'Password Do Not Match',
+  PASSWORD_CHANGED: 'Password has been changed',
 };
 
 export const MAIL = {

@@ -25,6 +25,16 @@ export class UserLoginEvent {
   ) {}
 }
 
+export class PassChangeSuccess {
+  constructor(
+    public payload,
+    public priority?: Priority,
+  ) {}
+}
+
 export class PasswordResetEvent {
-  constructor(public payload: { user: User; priority: Priority }) {}
+  constructor(
+    public user: User,
+    public priority: Priority,
+  ) {}
 }

@@ -1,11 +1,11 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CONSTANT } from '../constants/index';
-import { UserRegisterEvent,UserLoginEvent, UserConfirmedMailEvent, PasswordResetEvent  } from './events.definitions';
+import { UserRegisterEvent,UserLoginEvent, UserConfirmedMailEvent, PassChangeSuccess, PasswordResetEvent,  } from './events.definitions';
 import { User } from '@prisma/client';
 import { Priority } from './events.interface';
 // import { User } from '@prisma/client';
 
-const { onUserRegister, onUserLogin, onEmailConfirmation, onPasswordReset } = CONSTANT;
+const { onUserRegister, onUserLogin, onEmailConfirmation, onPasswordReset, onPasswordChange } = CONSTANT;
 class EventsManager {
   constructor(private readonly eventEmitter: EventEmitter2) {}
   public onUserRegister(user: any) {
@@ -36,9 +36,20 @@ class EventsManager {
   }
   public onPasswordReset(user: User, priority: Priority){
     return this.eventEmitter.emit(onPasswordReset, 
-      new PasswordResetEvent({ user, priority })
+      new PasswordResetEvent(user, priority)
     );
-  } 
+  }
+
+  public onPasswordChange(user: User, priority: Priority) {
+    try {
+      this.eventEmitter.emit(
+        onPasswordChange,
+        new PassChangeSuccess(user, priority),
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }  
 }
 
 export default EventsManager;
