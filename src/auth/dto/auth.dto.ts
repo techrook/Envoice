@@ -87,12 +87,21 @@ export class CreateUserDto {
   password: string;
 
 }
-export class resendConfirmationMailDto {
-@IsString()
-@IsEmail()
-email: string;
-}    
-export class resetPasswordDto extends PasswordFieldsDto {
+export class ResendConfirmationMailDto {
+  @ApiProperty({
+    example: 'john.doe@example.com',
+    description: 'User email address to resend confirmation',
+  })
+  @IsString()
+  @IsEmail()
+  email: string;
+}
+
+export class ResetPasswordDto extends PasswordFieldsDto {
+  @ApiProperty({
+    example: 'reset_token_string',
+    description: 'Token for resetting password',
+  })
   @IsString()
   token: string;
 }

@@ -12,7 +12,7 @@ import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
 import EventsManager from 'src/common/events/events.manager';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { UserSignUpDto, UserLoginDto, resendConfirmationMailDto, resetPasswordDto } from './dto/auth.dto';
+import { UserSignUpDto, UserLoginDto, ResendConfirmationMailDto, ResetPasswordDto } from './dto/auth.dto';
 import { TokenUtil } from './jwttoken/token.util';
 import { PrismaClient } from '@prisma/client';
 import { QueuePriority } from 'src/common/events/events.interface';
@@ -185,7 +185,7 @@ export class AuthService {
   }
 
 
-  async requestPasswordReset(dto: resendConfirmationMailDto) {
+  async requestPasswordReset(dto: ResendConfirmationMailDto) {
     const user = await this.usersService.findUserByEmail(dto.email);
 
     if (!user) {
@@ -196,7 +196,7 @@ export class AuthService {
     return RESET_MAIL(dto.email);
   }
 
-  async resetPassword(dto: resetPasswordDto) {
+  async resetPassword(dto: ResetPasswordDto) {
     const isUser = await this.verifyToken(
       dto.token,
     );
