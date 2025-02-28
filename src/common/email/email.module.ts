@@ -3,12 +3,13 @@ import { EmailService } from './email.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from 'src/auth/JWT Strategy/jwt.strategy';
 
 @Module({
   imports: [
     ConfigModule.forRoot(), // Ensure ConfigModule is set up
     MailerModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         transport: {
@@ -25,6 +26,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
       }),
     }),
   ],
-  providers: [EmailService, PrismaService],
+  providers: [EmailService, PrismaService,JwtStrategy],
 })
 export class EmailModule {}

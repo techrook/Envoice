@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable,} from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CONSTANT, MAIL } from '../constants';
 import { AppUtilities } from 'src/app.utilities';
@@ -6,6 +6,8 @@ import { User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import AppLogger from '../log/logger.config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { TokenUtil } from 'src/auth/jwttoken/token.util';
+import { JwtService } from '@nestjs/jwt';
 
 export interface WaitlistOpts {
   email: string;
@@ -87,12 +89,9 @@ export class EmailService {
    */
   async sendPasswordReset(user: User) {
     try {
-      const token = await this.tokenService.generateToken(
-        user.id,
-        tokenType.reset_password,
-      );
+      const token = await TokenUtil.generateResetPasswordToken(16);
 
-      const resetUrl = `${this.cfg.get('app')}/auth/change-password?token=${token.access_token}`;
+      const resetUrl = `${this.cfg.get('app')}/auth/change-password?token=${token}`;
 
       const htmlTemplate = this.prepMailContent('reqPasswordReset.html');
       const htmlContent = htmlTemplate
