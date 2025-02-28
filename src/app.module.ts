@@ -10,6 +10,9 @@ import { QueueModule } from './queue/queue.module';
 import { EmailModule } from './common/email/email.module';
 import { EmailService } from './common/email/email.service';
 import { BullConfigService } from 'config/bullConfigService';
+import { BusinessProfileModule } from './business-profile/business-profile.module';
+import { ClientModule } from './client/client.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -26,6 +29,9 @@ import { BullConfigService } from 'config/bullConfigService';
     EventsManagerModule,
     QueueModule,
     EmailModule,
+    BusinessProfileModule,
+    ClientModule,
+    InvoiceModule,
   ],
   controllers: [],
   providers: [EmailService, EventsManagerModule],

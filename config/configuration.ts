@@ -62,4 +62,9 @@ export const configuration = () => ({
     pass: process.env.REDIS_PASS,
     db: process.env.REDIS_DB || 'shadow-troupe',
   },
+  Twitter:{
+    consumerKey: process.env.TWITTER_CONSUMER_KEY,
+    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+    callbackURL: process.env.TWITTER_CALLBACK_URL,
+  }
 });

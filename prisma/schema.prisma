@@ -11,7 +11,7 @@ model User {
   id            String           @id @default(auto()) @map("_id") @db.ObjectId
   email         String           @unique
   username      String?          @unique
-  password      String?
+  password      String
   mobile        String?
   first_name    String?
   last_name     String?
@@ -21,13 +21,17 @@ model User {
   access_token  String?          @unique
   refresh_token String?
   verifiedToken String? 
-
+  provider      String?          // Added field for social login provider
+  providerId    String?          // Social login provider ID
   lastLogin     DateTime?
   emailVerified Boolean          @default(false)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @default(now()) @updatedAt
 
   refreshTokens RefreshToken[]   // Relation to RefreshToken
+  businessProfile BusinessProfile?
+  invoices      Invoice[]        // Relation to Invoice
+  clients       Client[]         // Relation to Client
 
   @@map("users")
 }
@@ -36,7 +40,70 @@ model RefreshToken {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   token     String   @unique
   userId    String   @db.ObjectId
-  user      User     @relation(fields: [userId], references: [id]) // Define the relation
+  user      User     @relation(fields: [userId], references: [id]) // Relation to User
   createdAt DateTime @default(now())
   expiresAt DateTime
+}
+
+model BusinessProfile {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  logo      String?  // Store the logo as binary data
+  location  String
+  contact   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  phone     String
+  address   String
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoices  Invoice[]
+}
+
+model Invoice {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  invoiceNumber String         @unique
+  issueDate    DateTime
+  dueDate      DateTime
+  status       InvoiceStatus   @default(PENDING)
+  notes        String?
+  totalAmount  Float           // Use Float instead of Decimal
+  userId       String          @db.ObjectId
+  user         User            @relation(fields: [userId], references: [id])
+  clientId     String          @db.ObjectId
+  client       Client          @relation(fields: [clientId], references: [id])
+  items        InvoiceItem[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId, clientId])
+}
+
+model InvoiceItem {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  description String
+  quantity    Int
+  unitPrice   Float     // Use Float instead of Decimal
+  discount    Float     @default(0) // Percentage discount (e.g., 10 for 10%)
+  amount      Float     @default(0) // Final amount after applying discount
+  invoiceId   String    @db.ObjectId
+  invoice     Invoice   @relation(fields: [invoiceId], references: [id])
+}
+
+enum InvoiceStatus {
+  PENDING
+  PAID
+  OVERDUE
 }

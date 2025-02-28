@@ -12,20 +12,19 @@ import { PrismaService } from 'src/prisma/prisma.service';
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         transport: {
-          host: config.get('MAIL_HOST'),
-          port: config.get<number>('MAIL_PORT'),
-          secure: true, // Use TLS (false for port 587)
+          host: config.get('MAIL_HOST'), // Brevo SMTP Host
+          port: config.get('MAIL_PORT'), // Brevo SMTP Port
+          secure: false, // Set to false for STARTTLS (port 587)
           auth: {
-            user: config.get('MAIL_USERNAME'),
-            pass: config.get('MAIL_PASSWORD'),
+            user: config.get('MAIL_USERNAME'), // Your Brevo SMTP login
+            pass: config.get('MAIL_PASSWORD'), // Your Brevo SMTP password
           },
-          logger: true,
-          debug: true,
+          logger: true, // Enable logging for debugging
+          debug: true, // Enable debug mode for troubleshooting
         },
       }),
     }),
-
   ],
-  providers: [EmailService,PrismaService]
+  providers: [EmailService, PrismaService],
 })
 export class EmailModule {}

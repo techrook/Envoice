@@ -1,21 +1,26 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
+import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
-import { PrismaClient } from '@prisma/client';
+import { EventsManagerModule } from 'src/common/events/events.module';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './JWT Strategy/jwt.strategy';
 
 @Module({
   imports: [
-    forwardRef(() => UsersModule),
-    PrismaModule, // Retain the PrismaModule from login-endpoint
+    UsersModule,
+    PrismaModule,
+    EventsManagerModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      global: true, // Retain the JWT configuration from login-endpoint
+      secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+      signOptions: { expiresIn: '1h' },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaClient],
+  providers: [AuthService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
