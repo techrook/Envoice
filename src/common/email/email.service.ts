@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable,} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CONSTANT, MAIL } from '../constants';
 import { AppUtilities } from 'src/app.utilities';
@@ -75,7 +75,9 @@ export class EmailService {
   /**
    * Generate email confirmation token
    */
-  private async generateEmailConfirmationToken(userId: string): Promise<string> {
+  private async generateEmailConfirmationToken(
+    userId: string,
+  ): Promise<string> {
     const accessToken = AppUtilities.generateToken(32);
     await this.prisma.user.update({
       where: { id: userId },
