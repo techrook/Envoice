@@ -12,6 +12,7 @@ import { EmailService } from './common/email/email.service';
 import { BullConfigService } from 'config/bullConfigService';
 import { BusinessProfileModule } from './business-profile/business-profile.module';
 import { ClientModule } from './client/client.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ClientModule } from './client/client.module';
     EmailModule,
     BusinessProfileModule,
     ClientModule,
+    InvoiceModule,
   ],
   controllers: [],
   providers: [EmailService, EventsManagerModule],
