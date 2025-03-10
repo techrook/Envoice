@@ -3,28 +3,30 @@ import { EmailService } from './email.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from 'src/auth/JWT Strategy/jwt.strategy';
 
 @Module({
   imports: [
     ConfigModule.forRoot(), // Ensure ConfigModule is set up
     MailerModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (config: ConfigService) => ({
         transport: {
-          host: config.get('MAIL_HOST'), // Brevo SMTP Host
-          port: config.get('MAIL_PORT'), // Brevo SMTP Port
-          secure: false, // Set to false for STARTTLS (port 587)
+          host: config.get<string>('MAIL_HOST'),
+          port: Number(config.get<string>('MAIL_PORT')), // Ensure it's a number
+          secure: true, // Use false for port 587 (STARTTLS)
           auth: {
-            user: config.get('MAIL_USERNAME'), // Your Brevo SMTP login
-            pass: config.get('MAIL_PASSWORD'), // Your Brevo SMTP password
+            user: config.get<string>('MAIL_USERNAME'),
+            pass: config.get<string>('MAIL_PASSWORD'),
           },
-          logger: true, // Enable logging for debugging
-          debug: true, // Enable debug mode for troubleshooting
+          logger: true,
+          debug: true,
         },
+        
       }),
     }),
   ],
-  providers: [EmailService, PrismaService],
+  providers: [EmailService, PrismaService,JwtStrategy],
 })
 export class EmailModule {}

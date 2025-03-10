@@ -1,11 +1,13 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Queue } from 'bullmq';
-import { log } from 'console';
+
 
 import { CONSTANT } from 'src/common/constants';
 const {
+  onPasswordChange,
   onUserRegister,
+  onPasswordReset,
   sendConfirmationMail,
   onEmailConfirmationSend,
   AuthQ,
@@ -22,7 +24,6 @@ export class EventBroker {
 
   @OnEvent(onUserRegister)
   async handleUserRegister(event) {
-    log(this.handleUserRegister)
     const user = event.payload;
     await this.authQ.add(sendConfirmationMail, {
       user,
@@ -35,7 +36,6 @@ export class EventBroker {
     await this.authQ.add('sendConfirmationMail', {
       user,
     });
-    console.log(this.handleSendEmailConfirmation)
   }
 
   @OnEvent(onUserLogin)
@@ -55,6 +55,27 @@ export class EventBroker {
       userId,
       token,
     });
-    log(this.handleEmailConfirmation)
+  }
+
+  @OnEvent(onPasswordReset)
+  async handlePasswordReset(event) {
+    const { user, priority } = event;
+    await this.authQ.add(onPasswordReset, {
+      user,
+      priority,
+    });
+  }
+  @OnEvent(onPasswordChange)
+  async handlePasswordChangeSuccess(event) {
+    const { payload, priority } = event;
+    await this.authQ.add(
+      onPasswordChange,
+      {
+        payload,
+      },
+      {
+        ...priority,
+      },
+    );
   }
 }

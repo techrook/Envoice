@@ -15,9 +15,7 @@ const { AuthQ } = CONSTANT;
           password: cfg.get<string>('Queue.pass'),
           username: cfg.get<string>('Queue.user'),
           port: cfg.get<number>('Queue.port'),
-          tls: {
-            rejectUnauthorized: false,
-          },
+          tls: {}, 
         },
       }),
       inject: [ConfigService],

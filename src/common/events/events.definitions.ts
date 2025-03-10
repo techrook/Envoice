@@ -24,3 +24,17 @@ export class UserLoginEvent {
     },
   ) {}
 }
+
+export class PassChangeSuccess {
+  constructor(
+    public payload,
+    public priority?: Priority,
+  ) {}
+}
+
+export class PasswordResetEvent {
+  constructor(
+    public user: User,
+    public priority: Priority,
+  ) {}
+}
