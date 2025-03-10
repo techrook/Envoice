@@ -63,6 +63,7 @@ export class SignUpConsumer extends IBaseWoker {
       }
 
       case onPasswordChange: {
+        console.log('Password Change Event', job.data);
         const { payload } = job.data;
         (await payload)
           ? this.emailService.notifyUserPasswordChange(payload)

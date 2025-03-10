@@ -42,6 +42,7 @@ class EventsManager {
 
   public onPasswordChange(user: User, priority: Priority) {
     try {
+      console.log('Password Change Event');
       this.eventEmitter.emit(
         onPasswordChange,
         new PassChangeSuccess(user, priority),
@@ -49,7 +50,7 @@ class EventsManager {
     } catch (error) {
       console.log(error);
     }
-  }  
+  }
 }
 
 export default EventsManager;

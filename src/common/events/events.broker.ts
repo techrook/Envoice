@@ -5,6 +5,7 @@ import { Queue } from 'bullmq';
 
 import { CONSTANT } from 'src/common/constants';
 const {
+  onPasswordChange,
   onUserRegister,
   onPasswordReset,
   sendConfirmationMail,
@@ -58,10 +59,23 @@ export class EventBroker {
 
   @OnEvent(onPasswordReset)
   async handlePasswordReset(event) {
-    const { user, priority } = event.payload;
+    const { user, priority } = event;
     await this.authQ.add(onPasswordReset, {
       user,
       priority,
     });
+  }
+  @OnEvent(onPasswordChange)
+  async handlePasswordChangeSuccess(event) {
+    const { payload, priority } = event;
+    await this.authQ.add(
+      onPasswordChange,
+      {
+        payload,
+      },
+      {
+        ...priority,
+      },
+    );
   }
 }

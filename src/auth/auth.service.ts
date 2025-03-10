@@ -2,6 +2,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotAcceptableException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -76,7 +77,7 @@ export class AuthService {
     try {
       const user = await this.usersService.findUserByEmail(dto.email);
       if (!user) throw new UnauthorizedException(INCORRECT_CREDS);
-
+      console.log("User:", user);
       const isMatch = await AppUtilities.validatePassword(
         dto.password,
         user.password,
@@ -200,10 +201,8 @@ export class AuthService {
     const isUser = await this.verifyToken(
       dto.token,
     );
-
+    console.log("Verified User:", isUser);
     if (!isUser) throw new UnauthorizedException(UNAUTHORIZED);
-
-   
     return await this.updatePassword(
       {
         confirmNewPassword: dto.confirmNewPassword,
@@ -214,15 +213,17 @@ export class AuthService {
   }
 
   private async updatePassword(dto: UpdatePasswordDto, id: string) {
+    console.log("Updating password for User ID:", id);
     const isMatch = AppUtilities.compareString(
       dto.newPassword,
       dto.confirmNewPassword,
     );
-
+    console.log(dto.newPassword, dto.confirmNewPassword);
     if (!isMatch) throw new NotAcceptableException(PASSWORD_NOT_MATCH);
 
     if (id) {
-      const password = await AppUtilities.hashPassword(dto.newPassword);
+      const password = await AppUtilities.hashPassword(dto.confirmNewPassword);
+      console.log("Hashed Password:", password);
       const updatedUser = await this.prisma.user.update({
         where: {
           id,
@@ -231,16 +232,17 @@ export class AuthService {
           password: password,
         },
       });
+      console.log(updatedUser);
+     
+    console.log("Updated User:", updatedUser);
 
-      updatedUser
-        ? this.eventsManager.onPasswordChange(
-            updatedUser,
-            QueuePriority.level1(),
-          )
-        : null;
-      return {
-        message: PASSWORD_CHANGED,
-      };
+    if (!updatedUser) {
+        throw new InternalServerErrorException("Password update failed");
+    }
+
+    this.eventsManager.onPasswordChange(updatedUser, QueuePriority.level1());
+
+    return { message: PASSWORD_CHANGED };
     }
   }
 

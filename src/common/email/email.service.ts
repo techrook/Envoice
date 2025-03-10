@@ -92,7 +92,10 @@ export class EmailService {
   async sendPasswordReset(user: User) {
     try {
       const token = await TokenUtil.generateResetPasswordToken(16);
-
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { verifiedToken: token },
+      });
       const resetUrl = `${this.cfg.get('app')}/auth/change-password?token=${token}`;
 
       const htmlTemplate = this.prepMailContent('reqPasswordReset.html');
