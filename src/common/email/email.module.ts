@@ -20,7 +20,6 @@ import { JwtStrategy } from 'src/auth/JWT Strategy/jwt.strategy';
             user: config.get<string>('MAIL_USERNAME'),
             pass: config.get<string>('MAIL_PASSWORD'),
           },
-          logger: true,
           debug: true,
         },
         

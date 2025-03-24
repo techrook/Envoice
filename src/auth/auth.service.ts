@@ -7,7 +7,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-//irt { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
@@ -77,7 +76,6 @@ export class AuthService {
     try {
       const user = await this.usersService.findUserByEmail(dto.email);
       if (!user) throw new UnauthorizedException(INCORRECT_CREDS);
-      console.log("User:", user);
       const isMatch = await AppUtilities.validatePassword(
         dto.password,
         user.password,
@@ -126,49 +124,47 @@ export class AuthService {
     } catch (err) {
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
     }
-
+  
     const storedToken = await this.prisma.refreshToken.findUnique({
       where: { token: refreshToken },
     });
-
+  
     if (!storedToken) {
       throw new UnauthorizedException(REFRESH_TOKEN_NOTFOUND);
     }
-
+  
     if (storedToken.userId !== payload.sub) {
       throw new UnauthorizedException(REFRESH_TOKEN_NOTFORUSER);
     }
-
+  
     if (new Date() > storedToken.expiresAt) {
       throw new UnauthorizedException(REFRESH_TOKEN_EXPIRED);
     }
-
+  
     const accessToken = TokenUtil.signAccessToken(this.jwtService, payload.sub);
     const newRefreshToken = TokenUtil.signRefreshToken(
       this.jwtService,
       payload.sub,
     );
+  
 
-    await this.prisma.$transaction([
-      this.prisma.refreshToken.delete({ where: { token: refreshToken } }),
-      this.prisma.refreshToken.create({
-        data: {
-          token: newRefreshToken,
-          userId: payload.sub,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        },
-      }),
-    ]);
-
+    await this.prisma.refreshToken.update({
+      where: { token: refreshToken },
+      data: {
+        token: newRefreshToken,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
+      },
+    });
+  
     return { accessToken, refreshToken: newRefreshToken };
   }
   async confirmEmail(token: string) {
     const userId = await this.verifyToken(token);
 
-    this.eventsManager.onEmailConfirmation(userId);
+
     const accessToken = TokenUtil.signAccessToken(this.jwtService, userId);
     const refreshToken = TokenUtil.signRefreshToken(this.jwtService, userId);
-
+    this.eventsManager.onEmailConfirmation(userId);
     return { accessToken, refreshToken };
     
   }
