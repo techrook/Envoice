@@ -13,7 +13,8 @@ import { BullConfigService } from 'config/bullConfigService';
 import { BusinessProfileModule } from './business-profile/business-profile.module';
 import { ClientModule } from './client/client.module';
 import { InvoiceModule } from './invoice/invoice.module';
-
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { FileUploadModule } from './common/file-upload/file-upload.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -32,6 +33,8 @@ import { InvoiceModule } from './invoice/invoice.module';
     BusinessProfileModule,
     ClientModule,
     InvoiceModule,
+    CloudinaryModule,
+    FileUploadModule,
   ],
   controllers: [],
   providers: [EmailService, EventsManagerModule],
