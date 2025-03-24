@@ -50,6 +50,7 @@ async function bootstrap() {
 
   logger.log(`Starting [${configService.get('appName')}] on port=[${port}]`);
   initSwagger(app, appHost);
+  app.enableCors();
   await app.listen(port);
 }
 bootstrap();

@@ -50,7 +50,7 @@ model BusinessProfile {
   userId    String   @unique @db.ObjectId
   user      User     @relation(fields: [userId], references: [id])
   name      String
-  logo      String?  // Store the logo as binary data
+  logo      String?  
   location  String
   contact   String
   createdAt DateTime @default(now())

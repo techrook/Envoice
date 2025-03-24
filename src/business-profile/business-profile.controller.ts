@@ -1,42 +1,60 @@
-import { Controller, Post, Body, Param, Put, Get, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Put,
+  Get,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { BusinessProfileService } from './business-profile.service';
-import { CreateBusinessProfileDto, UpdateBusinessProfileDto } from './dto/create-business-profile.dto';
+import {
+  CreateBusinessProfileDto,
+  UpdateBusinessProfileDto,
+} from './dto/create-business-profile.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/JwtAuthGuard/jwt-auth.guard'
+import { JwtAuthGuard } from 'src/auth/JwtAuthGuard/jwt-auth.guard';
 
 @ApiTags('Business Profile')
-@ApiBearerAuth() // Adds Bearer token support in Swagger
+@ApiBearerAuth()
 @Controller('business-profile')
 export class BusinessProfileController {
   constructor(private businessProfileService: BusinessProfileService) {}
 
   @ApiOperation({ summary: 'Create Business Profile' })
-  @UseGuards(JwtAuthGuard) // Protect this endpoint
+  @UseGuards(JwtAuthGuard)
   @Post('create')
   async create(
-    @Req() req: any, // Extract user from the request (set by JwtAuthGuard)
+    @Req() req: any,
     @Body() createBusinessProfileDto: CreateBusinessProfileDto,
   ) {
-    const userId = req.user.id; // Assuming `id` is set in the JWT payload
-    return this.businessProfileService.createBusinessProfile(userId, createBusinessProfileDto);
+    const userId = req.user.id;
+    return this.businessProfileService.createBusinessProfile(
+      userId,
+      createBusinessProfileDto,
+    );
   }
 
   @ApiOperation({ summary: 'Update Business Profile' })
-  @UseGuards(JwtAuthGuard) // Protect this endpoint
+  @UseGuards(JwtAuthGuard)
   @Put('update')
   async update(
-    @Req() req: any, // Extract user from the request
+    @Req() req: any,
     @Body() updateBusinessProfileDto: UpdateBusinessProfileDto,
   ) {
-    const userId = req.user.id; // Get user ID from the JWT payload
-    return this.businessProfileService.updateBusinessProfile(userId, updateBusinessProfileDto);
+    const userId = req.user.id;
+    return this.businessProfileService.updateBusinessProfile(
+      userId,
+      updateBusinessProfileDto,
+    );
   }
 
   @ApiOperation({ summary: 'Get Business Profile' })
-  @UseGuards(JwtAuthGuard) // Protect this endpoint
+  @UseGuards(JwtAuthGuard)
   @Get('get')
   async get(@Req() req: any) {
-    const userId = req.user.id; // Get user ID from the JWT payload
+    const userId = req.user.id;
     return this.businessProfileService.getBusinessProfile(userId);
   }
 }
