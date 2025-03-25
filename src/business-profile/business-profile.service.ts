@@ -32,7 +32,7 @@ export class BusinessProfileService {
         ...dto,
       },
     });
-
+    
     if (file) {
 
       this.eventsManager.onBusinessProfileCreated(userId, file);

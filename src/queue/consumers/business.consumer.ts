@@ -11,8 +11,9 @@ const { BUSINESS_PROFILE_CREATED, BusinessQ } = CONSTANT;
 
 @Processor(BusinessQ)
 export class BusinessProfileConsumer extends IBaseWoker {
+  private readonly businessProfileService: BusinessProfileService
   constructor(
-    private readonly businessProfileService: BusinessProfileService,
+    
     private readonly prisma: PrismaClient,
     private readonly emailService: EmailService,
     public readonly log: AppLogger,
