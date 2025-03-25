@@ -6,14 +6,17 @@ import {
 } from './dto/create-business-profile.dto';
 import { PrismaClient } from '@prisma/client';
 import { CONSTANT } from 'src/common/constants';
+import EventsManager from 'src/common/events/events.manager';
 
-const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND } = CONSTANT;
+const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND,BUSINESS_PROFILE_CREATED,onBusinessProfileCreated } = CONSTANT;
 
 @Injectable()
 export class BusinessProfileService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService,
+    private readonly eventsManager: EventsManager,
+  ) {}
 
-  async createBusinessProfile(userId: string, dto: CreateBusinessProfileDto) {
+  async createBusinessProfile(userId: string, dto: CreateBusinessProfileDto, file?: Express.Multer.File) {
     const existingProfile = await this.prisma.businessProfile.findUnique({
       where: { userId },
     });
@@ -25,11 +28,16 @@ export class BusinessProfileService {
     const businessProfile = await this.prisma.businessProfile.create({
       data: {
         userId,
+        logo:"on queue",
         ...dto,
       },
     });
 
-    return businessProfile;
+    if (file) {
+
+      this.eventsManager.onBusinessProfileCreated(userId, file);
+    }
+    return BUSINESS_PROFILE_CREATED;
   }
 
   async updateBusinessProfile(userId: string, dto: UpdateBusinessProfileDto) {

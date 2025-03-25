@@ -1,25 +1,27 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { v2 as cloudinary } from 'cloudinary';
-import { UploadApiResponse } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+
 
 @Injectable()
 export class FileUploadService {
-  async uploadFile(file: Express.Multer.File): Promise<{ fileName: string; fileUrl: string }> {
-    if (!file) {
-      throw new BadRequestException('No file uploaded');
-    }
+  constructor() {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  }
 
-    // Upload file to Cloudinary
-    const result: UploadApiResponse = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
-        if (error) reject(error);
-        resolve(result);
+  async uploadFile(file: Express.Multer.File): Promise<{ url: string; filename: string }> {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream({ folder: 'business-logos' }, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve({ url: result.secure_url, filename: result.public_id });
+        }
       }).end(file.buffer);
     });
-
-    return {
-      fileName: result.original_filename,
-      fileUrl: result.secure_url,
-    };
   }
 }
