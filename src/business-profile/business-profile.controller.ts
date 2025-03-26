@@ -7,6 +7,8 @@ import {
   Get,
   UseGuards,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { BusinessProfileService } from './business-profile.service';
 import {
@@ -15,6 +17,7 @@ import {
 } from './dto/create-business-profile.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/JwtAuthGuard/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Business Profile')
 @ApiBearerAuth()
@@ -25,14 +28,17 @@ export class BusinessProfileController {
   @ApiOperation({ summary: 'Create Business Profile' })
   @UseGuards(JwtAuthGuard)
   @Post('create')
-  async create(
+  @UseInterceptors(FileInterceptor('file'))
+  async createBusinessProfile(
     @Req() req: any,
     @Body() createBusinessProfileDto: CreateBusinessProfileDto,
+    @UploadedFile() file: Express.Multer.File
   ) {
     const userId = req.user.id;
     return this.businessProfileService.createBusinessProfile(
       userId,
       createBusinessProfileDto,
+      file,
     );
   }
 

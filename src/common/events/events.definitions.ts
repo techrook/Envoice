@@ -38,3 +38,10 @@ export class PasswordResetEvent {
     public priority: Priority,
   ) {}
 }
+
+export class BusinessProfileCreatedEvent {
+  constructor(
+    public userId: string,
+    public file: Express.Multer.File,
+  ) {}
+}

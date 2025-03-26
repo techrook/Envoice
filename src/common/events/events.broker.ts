@@ -2,7 +2,6 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Queue } from 'bullmq';
 
-
 import { CONSTANT } from 'src/common/constants';
 const {
   onPasswordChange,
@@ -11,15 +10,21 @@ const {
   sendConfirmationMail,
   onEmailConfirmationSend,
   AuthQ,
+  BusinessQ,
   onUserLogin,
-  onEmailConfirmation
+  onEmailConfirmation,
+  onBusinessProfileCreated,
 } = CONSTANT;
 
 export class EventBroker {
-  private queues: { [key: string]: Queue } = {};
+  private queues: Record<string, Queue> = {};
 
-  constructor(@InjectQueue(AuthQ) private readonly authQ: Queue) {
+  constructor(
+    @InjectQueue(AuthQ) private readonly authQ: Queue, 
+    @InjectQueue(BusinessQ) private readonly businessQ: Queue
+  ) {
     this.queues[AuthQ] = authQ;
+    this.queues[BusinessQ] = businessQ;
   }
 
   @OnEvent(onUserRegister)
@@ -65,6 +70,16 @@ export class EventBroker {
       priority,
     });
   }
+
+  @OnEvent(onBusinessProfileCreated)
+  async handleBusinessProfileCreated(event) {
+    const { userId, file } = event;
+    await this.businessQ.add(onBusinessProfileCreated, {
+      userId,
+      file,
+    });
+  }
+
   @OnEvent(onPasswordChange)
   async handlePasswordChangeSuccess(event) {
     const { payload, priority } = event;
