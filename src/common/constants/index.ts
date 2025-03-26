@@ -22,7 +22,7 @@ export const CONSTANT = {
   REFRESH_TOKEN_EXPIRED: 'Refresh token expired',
   REFRESH_TOKEN_NOTFOUND: 'Refresh token not found',
   REFRESH_TOKEN_NOTFORUSER: 'Refresh token does not belong to the user',
-  BUSINESS_PROFILE_EXISTS: 'Business profile already exists',
+  BUSINESS_PROFILE_EXISTS: 'Business profile already exists for this user',
   BUSINESS_PROFILE_NOTFOUND: 'Business profile not found',
   BUSINESS_PROFILE_REQUIRED: 'You must have a business profile to create client or invoice',
   BUSINESS_PROFILE_REQUIRED_FOR_VIEWING: 'You must have a business profile to view clients',

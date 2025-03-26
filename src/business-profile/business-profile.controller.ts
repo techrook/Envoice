@@ -29,7 +29,7 @@ export class BusinessProfileController {
   @UseGuards(JwtAuthGuard)
   @Post('create')
   @UseInterceptors(FileInterceptor('file'))
-  async create(
+  async createBusinessProfile(
     @Req() req: any,
     @Body() createBusinessProfileDto: CreateBusinessProfileDto,
     @UploadedFile() file: Express.Multer.File

@@ -73,7 +73,7 @@ export class EventBroker {
 
   @OnEvent(onBusinessProfileCreated)
   async handleBusinessProfileCreated(event) {
-    const { userId, file } = event.payload;
+    const { userId, file } = event;
     await this.businessQ.add(onBusinessProfileCreated, {
       userId,
       file,

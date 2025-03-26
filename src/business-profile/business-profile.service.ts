@@ -8,7 +8,7 @@ import { PrismaClient } from '@prisma/client';
 import { CONSTANT } from 'src/common/constants';
 import EventsManager from 'src/common/events/events.manager';
 
-const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND,BUSINESS_PROFILE_CREATED,onBusinessProfileCreated } = CONSTANT;
+const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND,BUSINESS_PROFILE_CREATED, } = CONSTANT;
 
 @Injectable()
 export class BusinessProfileService {
@@ -28,11 +28,10 @@ export class BusinessProfileService {
     const businessProfile = await this.prisma.businessProfile.create({
       data: {
         userId,
-        logo:"on queue",
+        logo:null,
         ...dto,
       },
     });
-    
     if (file) {
 
       this.eventsManager.onBusinessProfileCreated(userId, file);

@@ -7,7 +7,7 @@ import { EmailService } from 'src/common/email/email.service';
 import { IBaseWoker } from 'src/common/interfaces/queue.interface';
 import AppLogger from 'src/common/log/logger.config';
 
-const { BUSINESS_PROFILE_CREATED, BusinessQ } = CONSTANT;
+const { BUSINESS_PROFILE_CREATED,onBusinessProfileCreated, BusinessQ } = CONSTANT;
 
 @Processor(BusinessQ)
 export class BusinessProfileConsumer extends IBaseWoker {
@@ -23,9 +23,9 @@ export class BusinessProfileConsumer extends IBaseWoker {
 
   async process(job: Job): Promise<any> {
     switch (job.name) {
-      case BUSINESS_PROFILE_CREATED: {
+      case onBusinessProfileCreated: {
         const { userId, file } = job.data;
-        console.log('BusinessProfileCreatedEvent', userId, file);
+        console.log('BusinessProfileCreatedEvent:business qeue', userId, file);
         break;
       }
       default: {

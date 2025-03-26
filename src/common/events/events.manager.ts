@@ -52,7 +52,6 @@ class EventsManager {
   }
 
   public onBusinessProfileCreated(userId: string, file: Express.Multer.File) {
-    console.log('Business Profile Created');
     return this.eventEmitter.emit(onBusinessProfileCreated,new BusinessProfileCreatedEvent(userId, file))
   }
   
