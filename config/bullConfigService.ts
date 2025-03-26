@@ -3,7 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { QueueModule } from 'src/queue/queue.module';
 import { CONSTANT } from 'src/common/constants';
-const { AuthQ } = CONSTANT;
+const { AuthQ,BusinessQ } = CONSTANT;
 
 @Global()
 @Module({
@@ -15,15 +15,14 @@ const { AuthQ } = CONSTANT;
           password: cfg.get<string>('Queue.pass'),
           username: cfg.get<string>('Queue.user'),
           port: cfg.get<number>('Queue.port'),
-          tls: {
-            rejectUnauthorized: false,
-          },
+          tls: {}, 
         },
       }),
       inject: [ConfigService],
     }),
 
     BullModule.registerQueue({ name: AuthQ }),
+    BullModule.registerQueue({ name: BusinessQ }),
     QueueModule,
   ],
   exports: [BullModule],

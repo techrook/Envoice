@@ -1,28 +1,34 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Queue } from 'bullmq';
-import { log } from 'console';
 
 import { CONSTANT } from 'src/common/constants';
 const {
+  onPasswordChange,
   onUserRegister,
+  onPasswordReset,
   sendConfirmationMail,
   onEmailConfirmationSend,
   AuthQ,
+  BusinessQ,
   onUserLogin,
-  onEmailConfirmation
+  onEmailConfirmation,
+  onBusinessProfileCreated,
 } = CONSTANT;
 
 export class EventBroker {
-  private queues: { [key: string]: Queue } = {};
+  private queues: Record<string, Queue> = {};
 
-  constructor(@InjectQueue(AuthQ) private readonly authQ: Queue) {
+  constructor(
+    @InjectQueue(AuthQ) private readonly authQ: Queue, 
+    @InjectQueue(BusinessQ) private readonly businessQ: Queue
+  ) {
     this.queues[AuthQ] = authQ;
+    this.queues[BusinessQ] = businessQ;
   }
 
   @OnEvent(onUserRegister)
   async handleUserRegister(event) {
-    log(this.handleUserRegister)
     const user = event.payload;
     await this.authQ.add(sendConfirmationMail, {
       user,
@@ -35,7 +41,6 @@ export class EventBroker {
     await this.authQ.add('sendConfirmationMail', {
       user,
     });
-    console.log(this.handleSendEmailConfirmation)
   }
 
   @OnEvent(onUserLogin)
@@ -55,6 +60,37 @@ export class EventBroker {
       userId,
       token,
     });
-    log(this.handleEmailConfirmation)
+  }
+
+  @OnEvent(onPasswordReset)
+  async handlePasswordReset(event) {
+    const { user, priority } = event;
+    await this.authQ.add(onPasswordReset, {
+      user,
+      priority,
+    });
+  }
+
+  @OnEvent(onBusinessProfileCreated)
+  async handleBusinessProfileCreated(event) {
+    const { userId, file } = event;
+    await this.businessQ.add(onBusinessProfileCreated, {
+      userId,
+      file,
+    });
+  }
+
+  @OnEvent(onPasswordChange)
+  async handlePasswordChangeSuccess(event) {
+    const { payload, priority } = event;
+    await this.authQ.add(
+      onPasswordChange,
+      {
+        payload,
+      },
+      {
+        ...priority,
+      },
+    );
   }
 }

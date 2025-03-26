@@ -53,5 +53,14 @@ export class AppUtilities {
   public static readFile(filePath: string): string {
     return fs.readFileSync(filePath, 'utf8');
   }
+
+  public static compareString(value1: string, value2: string) {
+    if (value1 === value2) return true;
+
+    return false;
+  }
+  public static capitalizeFirstLetter(value: string): string {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
 }
 

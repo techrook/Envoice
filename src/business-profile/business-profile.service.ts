@@ -1,21 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assuming you're using Prisma
-import { CreateBusinessProfileDto, UpdateBusinessProfileDto } from './dto/create-business-profile.dto';
+import {
+  CreateBusinessProfileDto,
+  UpdateBusinessProfileDto,
+} from './dto/create-business-profile.dto';
 import { PrismaClient } from '@prisma/client';
 import { CONSTANT } from 'src/common/constants';
+import EventsManager from 'src/common/events/events.manager';
 
-const { 
-  BUSINESS_PROFILE_EXISTS,
-  BUSINESS_PROFILE_NOTFOUND
-} = CONSTANT                       
+const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND,BUSINESS_PROFILE_CREATED, } = CONSTANT;
 
 @Injectable()
 export class BusinessProfileService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService,
+    private readonly eventsManager: EventsManager,
+  ) {}
 
-  // Create a Business Profile
-  async createBusinessProfile(userId: string, dto: CreateBusinessProfileDto) {
-    // Check if a business profile already exists for the user
+  async createBusinessProfile(userId: string, dto: CreateBusinessProfileDto, file?: Express.Multer.File) {
     const existingProfile = await this.prisma.businessProfile.findUnique({
       where: { userId },
     });
@@ -27,14 +28,17 @@ export class BusinessProfileService {
     const businessProfile = await this.prisma.businessProfile.create({
       data: {
         userId,
+        logo:null,
         ...dto,
       },
     });
+    if (file) {
 
-    return businessProfile;
+      this.eventsManager.onBusinessProfileCreated(userId, file);
+    }
+    return BUSINESS_PROFILE_CREATED;
   }
 
-  // Update a Business Profile
   async updateBusinessProfile(userId: string, dto: UpdateBusinessProfileDto) {
     const existingProfile = await this.prisma.businessProfile.findUnique({
       where: { userId },
@@ -52,7 +56,6 @@ export class BusinessProfileService {
     return updatedProfile;
   }
 
-  // Get the Business Profile
   async getBusinessProfile(userId: string) {
     const businessProfile = await this.prisma.businessProfile.findUnique({
       where: { userId },

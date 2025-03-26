@@ -6,6 +6,8 @@ import { User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import AppLogger from '../log/logger.config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { TokenUtil } from 'src/auth/jwttoken/token.util';
+import { JwtService } from '@nestjs/jwt';
 
 export interface WaitlistOpts {
   email: string;
@@ -73,12 +75,65 @@ export class EmailService {
   /**
    * Generate email confirmation token
    */
-  private async generateEmailConfirmationToken(userId: string): Promise<string> {
+  private async generateEmailConfirmationToken(
+    userId: string,
+  ): Promise<string> {
     const accessToken = AppUtilities.generateToken(32);
     await this.prisma.user.update({
       where: { id: userId },
       data: { verifiedToken: accessToken },
     });
     return accessToken;
+  }
+
+  /**
+   * Send password reset email to user
+   */
+  async sendPasswordReset(user: User) {
+    try {
+      const token = await TokenUtil.generateResetPasswordToken(16);
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { verifiedToken: token },
+      });
+      const resetUrl = `${this.cfg.get('app')}/auth/change-password?token=${token}`;
+
+      const htmlTemplate = this.prepMailContent('reqPasswordReset.html');
+      const htmlContent = htmlTemplate
+        .replace('{{resetUrl}}', resetUrl)
+        .replace('{{username}}', user.username);
+
+      const opts = {
+        subject: MAIL.passwordReset,
+        content: htmlContent,
+        ...user,
+      };
+
+      await this.dispatchMail(opts);
+    } catch (err) {
+      this.logger.error(err);
+      throw new BadRequestException({ status: 403, error: CONSTANT.OOPs });
+    }
+  }
+  async notifyUserPasswordChange(user: User) {
+    try {
+      const htmlTemplate = this.prepMailContent('passChangeSuccess.html');
+      const htmlContent = htmlTemplate.replace(
+        '{{username}}',
+        AppUtilities.capitalizeFirstLetter(user.username),
+      );
+
+      const opts = {
+        email: user.email,
+        username: user.username,
+        subject: MAIL.passswordChange,
+        content: htmlContent,
+      };
+
+      await this.dispatchMail(opts);
+    } catch (err) {
+      this.logger.error(err);
+      throw new BadRequestException({ status: 403, error: CONSTANT.OOPs });
+    }
   }
 }

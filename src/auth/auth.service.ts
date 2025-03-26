@@ -2,29 +2,37 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
+  NotAcceptableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-//irt { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
 import EventsManager from 'src/common/events/events.manager';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { UserSignUpDto, UserLoginDto } from './dto/auth.dto';
+import { UserSignUpDto, UserLoginDto, ResendConfirmationMailDto, ResetPasswordDto } from './dto/auth.dto';
 import { TokenUtil } from './jwttoken/token.util';
 import { PrismaClient } from '@prisma/client';
+import { QueuePriority } from 'src/common/events/events.interface';
+import { UpdatePasswordDto } from './dto/password.dto';
 
 const {
   CREDS_TAKEN,
   USERNAME_TAKEN,
   CONFIRM_MAIL_SENT,
+  RESET_MAIL,
+  USER_NOT_FOUND,
   INCORRECT_CREDS,
   MAIL_UNVERIFIED,
   INVALID_REFRESH_TOKEN,
   REFRESH_TOKEN_EXPIRED,
   REFRESH_TOKEN_NOTFOUND,
   REFRESH_TOKEN_NOTFORUSER,
+  UNAUTHORIZED,
+  PASSWORD_NOT_MATCH,
+  PASSWORD_CHANGED,
 } = CONSTANT;
 
 @Injectable()
@@ -68,7 +76,6 @@ export class AuthService {
     try {
       const user = await this.usersService.findUserByEmail(dto.email);
       if (!user) throw new UnauthorizedException(INCORRECT_CREDS);
-
       const isMatch = await AppUtilities.validatePassword(
         dto.password,
         user.password,
@@ -117,49 +124,47 @@ export class AuthService {
     } catch (err) {
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
     }
-
+  
     const storedToken = await this.prisma.refreshToken.findUnique({
       where: { token: refreshToken },
     });
-
+  
     if (!storedToken) {
       throw new UnauthorizedException(REFRESH_TOKEN_NOTFOUND);
     }
-
+  
     if (storedToken.userId !== payload.sub) {
       throw new UnauthorizedException(REFRESH_TOKEN_NOTFORUSER);
     }
-
+  
     if (new Date() > storedToken.expiresAt) {
       throw new UnauthorizedException(REFRESH_TOKEN_EXPIRED);
     }
-
+  
     const accessToken = TokenUtil.signAccessToken(this.jwtService, payload.sub);
     const newRefreshToken = TokenUtil.signRefreshToken(
       this.jwtService,
       payload.sub,
     );
+  
 
-    await this.prisma.$transaction([
-      this.prisma.refreshToken.delete({ where: { token: refreshToken } }),
-      this.prisma.refreshToken.create({
-        data: {
-          token: newRefreshToken,
-          userId: payload.sub,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        },
-      }),
-    ]);
-
+    await this.prisma.refreshToken.update({
+      where: { token: refreshToken },
+      data: {
+        token: newRefreshToken,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
+      },
+    });
+  
     return { accessToken, refreshToken: newRefreshToken };
   }
   async confirmEmail(token: string) {
     const userId = await this.verifyToken(token);
 
-    this.eventsManager.onEmailConfirmation(userId);
+
     const accessToken = TokenUtil.signAccessToken(this.jwtService, userId);
     const refreshToken = TokenUtil.signRefreshToken(this.jwtService, userId);
-
+    this.eventsManager.onEmailConfirmation(userId);
     return { accessToken, refreshToken };
     
   }
@@ -174,6 +179,67 @@ export class AuthService {
     }
 
     return user.id;
+  }
+
+
+  async requestPasswordReset(dto: ResendConfirmationMailDto) {
+    const user = await this.usersService.findUserByEmail(dto.email);
+
+    if (!user) {
+      throw new UnauthorizedException(USER_NOT_FOUND);
+    }
+
+    this.eventsManager.onPasswordReset(user, QueuePriority.level1());
+    return RESET_MAIL(dto.email);
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const isUser = await this.verifyToken(
+      dto.token,
+    );
+    console.log("Verified User:", isUser);
+    if (!isUser) throw new UnauthorizedException(UNAUTHORIZED);
+    return await this.updatePassword(
+      {
+        confirmNewPassword: dto.confirmNewPassword,
+        newPassword: dto.newPassword,
+      },
+      isUser,
+    );
+  }
+
+  private async updatePassword(dto: UpdatePasswordDto, id: string) {
+    console.log("Updating password for User ID:", id);
+    const isMatch = AppUtilities.compareString(
+      dto.newPassword,
+      dto.confirmNewPassword,
+    );
+    console.log(dto.newPassword, dto.confirmNewPassword);
+    if (!isMatch) throw new NotAcceptableException(PASSWORD_NOT_MATCH);
+
+    if (id) {
+      const password = await AppUtilities.hashPassword(dto.confirmNewPassword);
+      console.log("Hashed Password:", password);
+      const updatedUser = await this.prisma.user.update({
+        where: {
+          id,
+        },
+        data: {
+          password: password,
+        },
+      });
+      console.log(updatedUser);
+     
+    console.log("Updated User:", updatedUser);
+
+    if (!updatedUser) {
+        throw new InternalServerErrorException("Password update failed");
+    }
+
+    this.eventsManager.onPasswordChange(updatedUser, QueuePriority.level1());
+
+    return { message: PASSWORD_CHANGED };
+    }
   }
 
   // async socialLogin(user: any) {

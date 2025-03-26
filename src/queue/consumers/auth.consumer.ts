@@ -10,6 +10,8 @@ const {
   sendConfirmationMail,
   AuthQ,
   onUserLogin,
+  onPasswordChange,
+  onPasswordReset,
 } = CONSTANT;
 
 @Processor(AuthQ)
@@ -54,6 +56,21 @@ export class SignUpConsumer extends IBaseWoker {
         });
         break;
       }
+      case onPasswordReset: {
+        const { user } = job.data;
+        (await user) ? this.emailService.sendPasswordReset(user) : null;
+        break;
+      }
+
+      case onPasswordChange: {
+        console.log('Password Change Event', job.data);
+        const { payload } = job.data;
+        (await payload)
+          ? this.emailService.notifyUserPasswordChange(payload)
+          : null;
+        break;
+      }
+
       default: {
         this.log.warn(`Unknown job name: ${job.name}`);
       }
