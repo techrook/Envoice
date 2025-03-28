@@ -136,4 +136,32 @@ export class EmailService {
       throw new BadRequestException({ status: 403, error: CONSTANT.OOPs });
     }
   }
+  async notifyUserBusinessProfileCreated(user: User) {
+    try {
+      // Prepare the HTML template
+      const htmlTemplate = this.prepMailContent('businessProfileCreated.html');
+      
+      // Replace placeholders in the template
+      const htmlContent = htmlTemplate
+        .replace('{{username}}', AppUtilities.capitalizeFirstLetter(user.username))
+        .replace('{{dashboardLink}}', `${this.cfg.get('FRONTEND_URL')}/dashboard/business-profile`);
+  
+      // Prepare email options
+      const opts = {
+        email: user.email,
+        username: user.username,
+        subject: 'Business Profile Created Successfully',
+        content: htmlContent,
+      };
+  
+      // Send the email
+      await this.dispatchMail(opts);
+    } catch (error) {
+      this.logger.error('Failed to send business profile creation notification', error);
+      throw new BadRequestException({ 
+        status: 403, 
+        error: error.message
+      });
+    }
+  }
 }
