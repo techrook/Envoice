@@ -16,16 +16,29 @@ export class FileUploadService {
   }
 
   async uploadFile(
-    file: Express.Multer.File | { buffer: Buffer; originalname: string }
+    file: Express.Multer.File | { buffer: Buffer | any; originalname: string }
   ): Promise<{ url: string; filename: string }> {
-    if (!file || !file.buffer) {
-      this.logger.error('Upload failed: File buffer is missing.');
-      throw new Error('Invalid file: Buffer is required for upload.');
+    if (!file) {
+      this.logger.error('Upload failed: File is missing.');
+      throw new Error('Invalid file: File is required for upload.');
     }
-
-    const buffer = file.buffer;
+    
+    let buffer;
+    
+    // Handle both Buffer objects and serialized buffer objects
+    if (file.buffer && typeof file.buffer === 'object' && file.buffer.data) {
+      // If we have a serialized buffer object with data property
+      buffer = Buffer.from(file.buffer.data);
+    } else if (file.buffer instanceof Buffer) {
+      // If we already have a proper Buffer
+      buffer = file.buffer;
+    } else {
+      this.logger.error('Upload failed: Invalid buffer format.');
+      throw new Error('Invalid file: Buffer format is not supported.');
+    }
+    
     const originalname = file.originalname || 'uploaded-file';
-
+    
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -41,7 +54,6 @@ export class FileUploadService {
             this.logger.error('Cloudinary upload failed:', error);
             return reject(new Error('File upload to Cloudinary failed.'));
           }
-
           this.logger.log(`File uploaded successfully: ${result.secure_url}`);
           resolve({
             url: result.secure_url,
@@ -49,9 +61,10 @@ export class FileUploadService {
           });
         }
       );
-
-      // Write buffer to upload stream
+      
+      // Write buffer to upload stream (not buffer.data)
       uploadStream.end(buffer);
     });
   }
+  
 }
