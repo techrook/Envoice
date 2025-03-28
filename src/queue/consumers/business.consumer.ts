@@ -28,9 +28,22 @@ export class BusinessProfileConsumer extends IBaseWoker {
     switch (job.name) {
       case onBusinessProfileCreated: {
         const { userId, file } = job.data;
-        console.log('BusinessProfileCreatedEvent:business qeue', userId, file);
+        console.log(`job data: ${userId} ${file}`);
         const user = await this.usersService.getBy({ field: 'id', value: userId });
-        const imageURLandName = await this.fileUploadService.uploadFile(file);
+        // const fileToUpload = {
+        //   buffer: file.buffer,
+        //   originalname: file.originalname
+        // };
+
+        // Upload file
+        let imageURLandName;
+        try {
+          imageURLandName = await this.fileUploadService.uploadFile(file.buffer, file.originalname);
+        } catch (uploadError) {
+          console.log('File upload failed', uploadError);
+          throw new Error('File upload failed');
+        }
+        console.log('BusinessProfileCreatedEvent:image', imageURLandName);
         await this.businessProfileService.updateBusinessProfile(userId, { logo: imageURLandName.url });
         break;
       }
