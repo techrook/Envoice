@@ -29,6 +29,7 @@ export const CONSTANT = {
   BUSINESS_PROFILE_CREATED: 'Business profile created successfully',
   BUSINESS_PROFILE_UPDATED: 'Business profile updated successfully',
   onBusinessProfileCreated: 'business.profile.created',
+  onBusinessProfileUpdated: 'business.profile.updated',
   CLIENT_UPDATE_FORBIDDEN: 'You are not allowed to update this client',
   CLIENT_NOT_FOUND: 'Client not found',
   CLIENT_DELETE_FORBIDDEN: 'You are not allowed to delete this client',

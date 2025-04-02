@@ -47,7 +47,7 @@ export class BusinessProfileService {
     }
 
     if (file) {
-      this.eventsManager.onBusinessProfileCreated(userId, file);
+      this.eventsManager.onBusinessProfileUpdated(userId, file);
     }
 
     const updatedProfile = await this.prisma.businessProfile.update({

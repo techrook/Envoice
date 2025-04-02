@@ -45,3 +45,10 @@ export class BusinessProfileCreatedEvent {
     public file: Express.Multer.File,
   ) {}
 }
+
+export class BusinessProfileUpdatedEvent {
+  constructor(
+    public userId: string,
+    public file: Express.Multer.File,
+  ) {}
+}
