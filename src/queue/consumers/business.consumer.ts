@@ -12,7 +12,7 @@ const { BUSINESS_PROFILE_CREATED,onBusinessProfileCreated, BusinessQ } = CONSTAN
 
 @Processor(BusinessQ)
 export class BusinessProfileConsumer extends IBaseWoker {
-  private readonly businessProfileService: BusinessProfileService
+  
   constructor(
     
     private readonly prisma: PrismaClient,
@@ -20,6 +20,7 @@ export class BusinessProfileConsumer extends IBaseWoker {
     public readonly log: AppLogger,
     private readonly fileUploadService: FileUploadService,
     private readonly usersService: UsersService,
+    private readonly businessProfileService: BusinessProfileService
   ) {
     super(log);
   }
@@ -28,23 +29,18 @@ export class BusinessProfileConsumer extends IBaseWoker {
     switch (job.name) {
       case onBusinessProfileCreated: {
         const { userId, file } = job.data;
-        console.log(`job data: ${userId} ${file}`);
         const user = await this.usersService.getBy({ field: 'id', value: userId });
         const fileToUpload = {
           buffer: file.buffer,
           originalname: file.originalname
         };
-        console.log(fileToUpload)
-
-        // Upload file
         let imageURLandName;
         try {
           imageURLandName = await this.fileUploadService.uploadFile(fileToUpload);
+          await this.emailService.notifyUserBusinessProfileCreated(user);
         } catch (uploadError) {
-          console.log('File upload failed', uploadError);
-          throw new Error('File upload failed');
+          this.log.error('File upload failed');
         }
-        console.log('BusinessProfileCreatedEvent:image', imageURLandName.url);
         await this.businessProfileService.updateBusinessProfile(userId, { logo: imageURLandName.url });
         break;
       }
