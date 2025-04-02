@@ -25,9 +25,9 @@ export class UpdateBusinessProfileDto {
   @IsOptional()
   name?: string;
 
-  // @IsString()
-  // @IsOptional()
-  // logo?: string; // For logo update
+  @IsString()
+  @IsOptional()
+  logo?: string; // For logo update
 
   @IsString()
   @IsOptional()
