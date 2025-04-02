@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Profile Created Successfully</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f4f4f4;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+        }
+        .success-icon {
+            color: #28a745;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Business Profile Created Successfully</h1>
+        <p>Hi {{username}},</p>
+        <p>Congratulations! Your business profile has been successfully created on Envoice.</p>
+        <p>You can now access and manage your business profile to showcase your business details and start invoicing.</p>
+        <a href="{{dashboardLink}}" class="btn">Go to Dashboard</a>
+        <p style="margin-top: 20px; font-size: 0.9em;">If you did not create this profile, please contact our support team.</p>
+    </div>
+</body>
+</html>

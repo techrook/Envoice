@@ -33,7 +33,6 @@ export class BusinessProfileService {
       },
     });
     if (file) {
-
       this.eventsManager.onBusinessProfileCreated(userId, file);
     }
     return BUSINESS_PROFILE_CREATED;
