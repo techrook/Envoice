@@ -48,11 +48,13 @@ export class BusinessProfileController {
   async update(
     @Req() req: any,
     @Body() updateBusinessProfileDto: UpdateBusinessProfileDto,
+    @UploadedFile() file: Express.Multer.File
   ) {
     const userId = req.user.id;
     return this.businessProfileService.updateBusinessProfile(
       userId,
       updateBusinessProfileDto,
+      file,
     );
   }
 

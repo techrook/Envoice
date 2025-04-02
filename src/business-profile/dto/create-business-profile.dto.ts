@@ -9,11 +9,6 @@ export class CreateBusinessProfileDto {
   @IsNotEmpty()
   name: string;
 
-  // @ApiProperty({ example: 'logo.png', description: 'Business logo file path' })
-  // @IsString()
-  // @IsNotEmpty()
-  // logo: string; // We'll store the logo file path
-
   @ApiProperty({ example: '123 Main St, City, State', description: 'Business location' })
   @IsString()
   @IsNotEmpty()
@@ -30,9 +25,9 @@ export class UpdateBusinessProfileDto {
   @IsOptional()
   name?: string;
 
-  @IsString()
-  @IsOptional()
-  logo?: string; // For logo update
+  // @IsString()
+  // @IsOptional()
+  // logo?: string; // For logo update
 
   @IsString()
   @IsOptional()

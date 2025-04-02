@@ -4,7 +4,6 @@ import {
   CreateBusinessProfileDto,
   UpdateBusinessProfileDto,
 } from './dto/create-business-profile.dto';
-import { PrismaClient } from '@prisma/client';
 import { CONSTANT } from 'src/common/constants';
 import EventsManager from 'src/common/events/events.manager';
 
@@ -38,13 +37,17 @@ export class BusinessProfileService {
     return BUSINESS_PROFILE_CREATED;
   }
 
-  async updateBusinessProfile(userId: string, dto: UpdateBusinessProfileDto) {
+  async updateBusinessProfile(userId: string, dto: UpdateBusinessProfileDto, file?: Express.Multer.File) {
     const existingProfile = await this.prisma.businessProfile.findUnique({
       where: { userId },
     });
 
     if (!existingProfile) {
       throw new NotFoundException(BUSINESS_PROFILE_NOTFOUND);
+    }
+
+    if (file) {
+      this.eventsManager.onBusinessProfileCreated(userId, file);
     }
 
     const updatedProfile = await this.prisma.businessProfile.update({
