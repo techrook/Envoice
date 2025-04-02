@@ -54,6 +54,7 @@ export const configuration = () => ({
   appRoot: process.cwd(),
   version: process.env.VERSION || '1.0',
   host: process.env.APP_HOST || `http://localhost:${process.env.PORT || 3456}`,
+  FRONTEND_URL:process.env.FRONTEND_URL,
   Queue: {
     url: process.env.REDIS_URL,
     port: process.env.REDIS_PORT,

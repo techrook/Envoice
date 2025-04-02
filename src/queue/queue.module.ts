@@ -5,9 +5,11 @@ import { PrismaClient } from '@prisma/client';
 import { EmailService } from 'src/common/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BusinessProfileConsumer } from './consumers/business.consumer';
-
+import { FileUploadService } from 'src/common/file-upload/file-upload.service';
+import { UsersService } from 'src/users/users.service';
+import { BusinessProfileService } from 'src/business-profile/business-profile.service';
 @Module({
-  providers: [SignUpConsumer, SignUpEventListener, PrismaClient, EmailService,PrismaService,BusinessProfileConsumer, ],
+  providers: [SignUpConsumer, SignUpEventListener, PrismaClient, EmailService,PrismaService,BusinessProfileConsumer,FileUploadService,UsersService,BusinessProfileService ],
 
   imports: [],
 })
