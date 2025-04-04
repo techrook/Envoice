@@ -14,6 +14,7 @@ const {
   onUserLogin,
   onEmailConfirmation,
   onBusinessProfileCreated,
+  onBusinessProfileUpdated,
 } = CONSTANT;
 
 export class EventBroker {
@@ -75,6 +76,15 @@ export class EventBroker {
   async handleBusinessProfileCreated(event) {
     const { userId, file } = event;
     await this.businessQ.add(onBusinessProfileCreated, {
+      userId,
+      file,
+    });
+  }
+
+  @OnEvent(onBusinessProfileUpdated)
+  async handleBusinessProfileUpdated(event) {
+    const { userId, file } = event;
+    await this.businessQ.add(onBusinessProfileUpdated, {
       userId,
       file,
     });
