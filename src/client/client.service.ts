@@ -1,16 +1,19 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClientDto, UpdateClientDto } from './dto/create-client-dto';
 import { CONSTANT } from 'src/common/constants';
 
-const { 
-    BUSINESS_PROFILE_REQUIRED,
-    BUSINESS_PROFILE_REQUIRED_FOR_VIEWING,
-    CLIENT_UPDATE_FORBIDDEN,
-    CLIENT_NOT_FOUND,
-    CLIENT_DELETE_FORBIDDEN
-  } = CONSTANT
-   
+const {
+  BUSINESS_PROFILE_REQUIRED,
+  BUSINESS_PROFILE_REQUIRED_FOR_VIEWING,
+  CLIENT_UPDATE_FORBIDDEN,
+  CLIENT_NOT_FOUND,
+  CLIENT_DELETE_FORBIDDEN,
+} = CONSTANT;
 
 @Injectable()
 export class ClientService {
@@ -34,7 +37,6 @@ export class ClientService {
   }
 
   async getAllClients(userId: string) {
-    // Ensure the user has a business profile
     const businessProfile = await this.prisma.businessProfile.findUnique({
       where: { userId },
     });
@@ -47,7 +49,11 @@ export class ClientService {
     });
   }
 
-  async updateClient(userId: string, clientId: string, updateClientDto: UpdateClientDto) {
+  async updateClient(
+    userId: string,
+    clientId: string,
+    updateClientDto: UpdateClientDto,
+  ) {
     const client = await this.prisma.client.findUnique({
       where: { id: clientId },
     });
