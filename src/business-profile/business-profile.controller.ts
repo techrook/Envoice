@@ -45,6 +45,7 @@ export class BusinessProfileController {
   @ApiOperation({ summary: 'Update Business Profile' })
   @UseGuards(JwtAuthGuard)
   @Put('update')
+  @UseInterceptors(FileInterceptor('file'))
   async update(
     @Req() req: any,
     @Body() updateBusinessProfileDto: UpdateBusinessProfileDto,

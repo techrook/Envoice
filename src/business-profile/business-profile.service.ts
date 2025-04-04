@@ -7,7 +7,7 @@ import {
 import { CONSTANT } from 'src/common/constants';
 import EventsManager from 'src/common/events/events.manager';
 
-const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND,BUSINESS_PROFILE_CREATED, } = CONSTANT;
+const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND,BUSINESS_PROFILE_CREATED,BUSINESS_PROFILE_UPDATED, } = CONSTANT;
 
 @Injectable()
 export class BusinessProfileService {
@@ -46,6 +46,8 @@ export class BusinessProfileService {
       throw new NotFoundException(BUSINESS_PROFILE_NOTFOUND);
     }
 
+    console.log('file', file);
+
     if (file) {
       this.eventsManager.onBusinessProfileUpdated(userId, file);
     }
@@ -55,7 +57,7 @@ export class BusinessProfileService {
       data: dto,
     });
 
-    return updatedProfile;
+    return BUSINESS_PROFILE_UPDATED;
   }
 
   async getBusinessProfile(userId: string) {
