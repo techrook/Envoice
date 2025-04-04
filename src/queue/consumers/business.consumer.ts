@@ -8,7 +8,7 @@ import { IBaseWoker } from 'src/common/interfaces/queue.interface';
 import { FileUploadService } from 'src/common/file-upload/file-upload.service';
 import AppLogger from 'src/common/log/logger.config';
 import { UsersService } from 'src/users/users.service';
-const { BUSINESS_PROFILE_CREATED,onBusinessProfileCreated, BusinessQ } = CONSTANT;
+const { onBusinessProfileCreated, BusinessQ, onBusinessProfileUpdated } = CONSTANT;
 
 @Processor(BusinessQ)
 export class BusinessProfileConsumer extends IBaseWoker {
@@ -44,6 +44,23 @@ export class BusinessProfileConsumer extends IBaseWoker {
         await this.businessProfileService.updateBusinessProfile(userId, { logo: imageURLandName.url });
         break;
       }
+
+      case onBusinessProfileUpdated: {
+        const { userId, file } = job.data;
+        const fileToUpload = {
+          buffer: file.buffer,
+          originalname: file.originalname
+        };
+        let imageURLandName;
+        try {
+          imageURLandName = await this.fileUploadService.uploadFile(fileToUpload);
+        } catch (uploadError) {
+          this.log.error('File upload failed');
+        }
+        await this.businessProfileService.updateBusinessProfile(userId, { logo: imageURLandName.url });
+        break;
+      }
+
       default: {
         this.log.warn(`Unknown job name: ${job.name}`);
       }

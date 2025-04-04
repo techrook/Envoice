@@ -45,14 +45,17 @@ export class BusinessProfileController {
   @ApiOperation({ summary: 'Update Business Profile' })
   @UseGuards(JwtAuthGuard)
   @Put('update')
+  @UseInterceptors(FileInterceptor('file'))
   async update(
     @Req() req: any,
     @Body() updateBusinessProfileDto: UpdateBusinessProfileDto,
+    @UploadedFile() file: Express.Multer.File
   ) {
     const userId = req.user.id;
     return this.businessProfileService.updateBusinessProfile(
       userId,
       updateBusinessProfileDto,
+      file,
     );
   }
 
