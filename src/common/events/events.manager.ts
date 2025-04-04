@@ -56,7 +56,6 @@ class EventsManager {
   }
   
   public onBusinessProfileUpdated(userId: string, file: Express.Multer.File) {
-     console.log('onBusinessProfileUpdated', userId, file);
     return this.eventEmitter.emit(onBusinessProfileUpdated,new BusinessProfileUpdatedEvent(userId, file))
   }
 }

@@ -46,8 +46,6 @@ export class BusinessProfileService {
       throw new NotFoundException(BUSINESS_PROFILE_NOTFOUND);
     }
 
-    console.log('file', file);
-
     if (file) {
       this.eventsManager.onBusinessProfileUpdated(userId, file);
     }
