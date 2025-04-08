@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Queue } from 'bullmq';
+import { on } from 'events';
 
 import { CONSTANT } from 'src/common/constants';
 const {
@@ -15,6 +16,7 @@ const {
   onEmailConfirmation,
   onBusinessProfileCreated,
   onBusinessProfileUpdated,
+  onInvoiceCreated,
 } = CONSTANT;
 
 export class EventBroker {
@@ -102,5 +104,14 @@ export class EventBroker {
         ...priority,
       },
     );
+  }
+  @OnEvent(onInvoiceCreated)
+  async handleInvoiceCreated(event) {
+    const { userId, clientId, invoice } = event;
+    await this.businessQ.add(onInvoiceCreated, {
+      userId,
+      clientId,
+      invoice,
+    });
   }
 }
