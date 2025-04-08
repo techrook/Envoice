@@ -2,10 +2,14 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/create-invoice-dto';
 import { CONSTANT } from '../common/constants';
+import EventsManager from 'src/common/events/events.manager';
 
 @Injectable()
 export class InvoiceService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventsManager: EventsManager // Replace 'any' with the actual type of eventsManager
+  ) {}
 
   async createInvoice(userId: string, createInvoiceDto: CreateInvoiceDto) {
     const { clientId, items, ...invoiceData } = createInvoiceDto;
@@ -28,7 +32,7 @@ export class InvoiceService {
       throw new ForbiddenException(CONSTANT.CLIENT_CREATE_FORBIDDEN);
     }
 
-    // Generate invoice number (using timestamp and a random component)
+
     const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000000)}`;
 
     // Calculate total amount
@@ -42,10 +46,10 @@ export class InvoiceService {
     const invoice = await this.prisma.invoice.create({
       data: {
         ...invoiceData,
-        invoiceNumber, // Use the generated invoice number
+        invoiceNumber,
         totalAmount,
-        userId, // Scalar field
-        clientId, // Scalar field
+        userId, 
+        clientId, 
         items: {
           create: items.map((item) => ({
             description: item.description,
@@ -62,6 +66,8 @@ export class InvoiceService {
         items: true, // This will include the invoice items
       },
     });
+
+    await this.eventsManager.onInvoiceCreated(userId,clientId, invoice);
 
     return invoice;
   }
@@ -136,6 +142,8 @@ export class InvoiceService {
       },
       include: { items: true }, // Return updated items
     });
+
+
 
     return updatedInvoice;
   }
