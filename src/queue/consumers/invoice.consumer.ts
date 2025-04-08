@@ -3,13 +3,16 @@ import { Job } from 'bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import AppLogger from 'src/common/log/logger.config';
 import { CONSTANT } from 'src/common/constants';
+import { IBaseWoker } from 'src/common/interfaces/queue.interface';
 const { onInvoiceCreated, InvoiceQ } = CONSTANT;
 @Processor(InvoiceQ)
 @Injectable()
-export class InvoiceConsumer {
+export class InvoiceConsumer extends IBaseWoker {
     constructor(
         public readonly log: AppLogger,
-    ) {}
+    ) {
+        super(log);
+    }
 
     async process(job: Job): Promise<any> {
         switch (job.name) {
