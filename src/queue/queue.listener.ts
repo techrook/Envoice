@@ -15,3 +15,10 @@ export class BusinessEventListener extends IListenToEvents {
     super(log);
   }
 }
+
+@QueueEventsListener('InvoiceJobs')
+export class InvoiceEventListener extends IListenToEvents {
+  constructor(log: AppLogger) {
+    super(log);
+  }
+}
