@@ -12,6 +12,7 @@ export const CONSTANT = {
   USER_NOT_FOUND: 'User not found',
   AuthQ: 'auth-queue',
   BusinessQ: 'business-queue',
+  InvoiceQ: 'invoice-queue',
   onUserLogin: 'user.login',
   onPasswordReset: 'user.password.reset.success',
   INCORRECT_CREDS: 'Incorrect Credentials',
