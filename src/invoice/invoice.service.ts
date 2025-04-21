@@ -27,7 +27,6 @@ export class InvoiceService {
     const client = await this.prisma.client.findUnique({
       where: { id: clientId },
     });
-
     if (!client || client.userId !== userId) {
       throw new ForbiddenException(CONSTANT.CLIENT_CREATE_FORBIDDEN);
     }
@@ -46,6 +45,8 @@ export class InvoiceService {
     const invoice = await this.prisma.invoice.create({
       data: {
         ...invoiceData,
+        issueDate:new Date(invoiceData.issueDate),
+        dueDate:new Date(invoiceData.dueDate),
         invoiceNumber,
         totalAmount,
         userId, 
