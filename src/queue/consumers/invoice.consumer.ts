@@ -11,55 +11,45 @@ import { InvoiceService } from 'src/invoice/invoice.service';
 @Processor(InvoiceQ)
 @Injectable()
 export class InvoiceConsumer extends IBaseWoker {
-    constructor(
-        public readonly log: AppLogger,
-        private readonly prisma: PrismaClient,
-        private readonly emailService: EmailService,  
-        private readonly invoiceService: InvoiceService,      
-    ) {
-        super(log);
-    }
-    async process(job: Job): Promise<any> {
-        switch (job.name) {
-          case onInvoiceCreated: {
-            const { userId, clientId, invoice } = job.data;
-      
-            this.log.log(`Processing invoice creation for user ${userId} and client ${clientId}`);
-      
-            // 1. Fetch user and client info
-            const [user, client] = await Promise.all([
-              this.prisma.user.findUnique({ where: { id: userId } }),
-              this.prisma.client.findUnique({ where: { id: clientId } }),
-            ]);
-      
-            if (!user || !client) {
-              this.log.error(`User or client not found`);
-              return;
-            }
-      
-            // 2. Generate PDF
-            const pdfBuffer = await this.invoiceService.generate(invoice); // implement this service
-      
-            // 3. Send Email
-            await this.emailService.sendMail({
-              to: [user.email, client.email],
-              subject: `Invoice ${invoice.invoiceNumber}`,
-              text: `Hello, please find attached invoice ${invoice.invoiceNumber}.`,
-              attachments: [
-                {
-                  filename: `Invoice-${invoice.invoiceNumber}.pdf`,
-                  content: pdfBuffer,
-                  contentType: 'application/pdf',
-                },
-              ],
-            });
-      
-            break;
-          }
-          default:
-            this.log.warn(`Unknown job name: ${job.name}`);
-            break;
+  constructor(
+    public readonly log: AppLogger,
+    private readonly prisma: PrismaClient,
+    private readonly emailService: EmailService,
+    private readonly invoiceService: InvoiceService,
+  ) {
+    super(log);
+  }
+  async process(job: Job): Promise<any> {
+    switch (job.name) {
+      case onInvoiceCreated: {
+        const { userId, clientId, invoice } = job.data;
+
+        this.log.log(
+          `Processing invoice creation for user ${userId} and client ${clientId}`,
+        );
+
+        // 1. Fetch user and client info
+        const [user, client] = await Promise.all([
+          this.prisma.user.findUnique({ where: { id: userId } }),
+          this.prisma.client.findUnique({ where: { id: clientId } }),
+        ]);
+
+        if (!user || !client) {
+          this.log.error(`User or client not found`);
+          return;
         }
+
+        // 2. Generate PDF
+        const pdfBuffer = await this.invoiceService.generate(invoice); // implement this service
+
+        // 3. Send Email
+        await this.emailService.sendInvoiceToUser(user, invoice, pdfBuffer);
+
+        break;
       }
-      
+      default:
+        this.log.warn(`Unknown job name: ${job.name}`);
+        break;
+    }
+  }
 }

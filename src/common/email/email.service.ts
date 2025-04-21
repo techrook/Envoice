@@ -39,14 +39,18 @@ export class EmailService {
   /**
    * Dispatch mail to recipient
    */
-  private async dispatchMail(options: WaitlistOpts) {
+  private async dispatchMail(
+    options: WaitlistOpts & { attachments?: { filename: string; content: Buffer }[] },
+  ) {
     return await this.mailerService.sendMail({
       to: options.email,
-      from: `${MAIL.noreply}`, // Customize sender details
+      from: `${MAIL.noreply}`,
       subject: options.subject,
       html: options.content,
+      attachments: options.attachments || [],
     });
   }
+  
 
   /**
    * Send confirmation email to user
@@ -164,44 +168,43 @@ export class EmailService {
       });
     }
   }
-  async sendInvoiceToUserAndClient(user: User, client: User, invoice: any, pdfBuffer: Buffer) {
+  async sendInvoiceToUser(user: User, invoice: any,pdfBuffer: Buffer) {
     try {
-      const subject = `Invoice ${invoice.invoiceNumber}`;
-      const htmlTemplate = this.prepMailContent('invoiceNotification.html');
+      // 1. Generate PDF
+
   
+      // 2. Load and prepare HTML email template
+      const htmlTemplate = this.prepMailContent('invoiceNotification.html');
       const htmlContent = htmlTemplate
         .replace('{{username}}', AppUtilities.capitalizeFirstLetter(user.username))
         .replace('{{invoiceNumber}}', invoice.invoiceNumber)
-        .replace('{{totalAmount}}', invoice.totalAmount.toFixed(2));
+        .replace('{{totalAmount}}', invoice.totalAmount.toFixed(2))
+        .replace('{{viewInvoiceLink}}', `${this.cfg.get('FRONTEND_URL')}/invoices/${invoice.id}`);
   
-      const emailOptions = {
-        from: `${MAIL.noreply}`,
-        subject,
-        html: htmlContent,
-        attachments: [
-          {
-            filename: `${invoice.invoiceNumber}.pdf`,
-            content: pdfBuffer,
-            contentType: 'application/pdf',
-          },
-        ],
-      };
+      // 3. Build attachment
+      const attachments = [
+        {
+          filename: `Invoice-${invoice.invoiceNumber}.pdf`,
+          content: pdfBuffer, // Buffer content
+        },
+      ];
   
-      // Send to user
-      await this.mailerService.sendMail({
-        to: user.email,
-        ...emailOptions,
+      // 4. Dispatch the email with attachment
+      await this.dispatchMail({
+        email: user.email,
+        username: user.username,
+        subject: `Invoice #${invoice.invoiceNumber} from Envoice`,
+        content: htmlContent,
+        attachments,
       });
-  
-      // Send to client
-      await this.mailerService.sendMail({
-        to: client.email,
-        ...emailOptions,
+    } catch (error) {
+      this.logger.error('Failed to send invoice email', error);
+      throw new BadRequestException({
+        status: 403,
+        error: CONSTANT.OOPs,
       });
-    } catch (err) {
-      this.logger.error('Error sending invoice email:', err);
-      throw new BadRequestException({ status: 403, error: CONSTANT.OOPS });
     }
   }
+  
   
 }
