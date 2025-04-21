@@ -9,8 +9,9 @@ import { FileUploadService } from 'src/common/file-upload/file-upload.service';
 import { UsersService } from 'src/users/users.service';
 import { BusinessProfileService } from 'src/business-profile/business-profile.service';
 import { InvoiceConsumer } from './consumers/invoice.consumer';
+import { InvoiceService } from 'src/invoice/invoice.service';
 @Module({
-  providers: [SignUpConsumer, SignUpEventListener, PrismaClient, EmailService,PrismaService,BusinessProfileConsumer,FileUploadService,UsersService,BusinessProfileService,InvoiceConsumer ],
+  providers: [SignUpConsumer, SignUpEventListener, PrismaClient, EmailService,PrismaService,BusinessProfileConsumer,FileUploadService,UsersService,BusinessProfileService,InvoiceConsumer,InvoiceService,BusinessEventListener], 
 
   imports: [],
 })
