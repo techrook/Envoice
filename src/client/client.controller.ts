@@ -1,4 +1,16 @@
-import { Controller, Post, Body, Get, UseGuards, Req, Param, Put, Delete, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Req,
+  Param,
+  Put,
+  Delete,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ClientService } from './client.service';
 import { CreateClientDto, UpdateClientDto } from './dto/create-client-dto';
 import { JwtAuthGuard } from '../auth/JwtAuthGuard/jwt-auth.guard';
@@ -14,9 +26,9 @@ export class ClientController {
   @Post('create')
   @ApiOperation({ summary: 'Create a new client' })
   async createClient(@Req() req, @Body() createClientDto: CreateClientDto) {
-    const userId = req.user.id; // Assuming JWT payload contains `id` of the user
+    const userId = req.user.id;
     return this.clientService.createClient(userId, createClientDto);
-  }   
+  }
 
   @Get()
   @ApiOperation({ summary: 'Get all clients' })

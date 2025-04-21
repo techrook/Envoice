@@ -14,7 +14,7 @@ export class InvoiceController {
   @Post('create')
   @ApiOperation({ summary: 'Create an invoice' })
   async createInvoice(@Req() req, @Body() createInvoiceDto: CreateInvoiceDto) {
-    const userId = req.user.id; // Assuming user is added to request by the JWT guard
+    const userId = req.user.id; 
     return this.invoiceService.createInvoice(userId, createInvoiceDto);
   }
   @Get()
