@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invoice Notification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon {
+      font-size: 48px;
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: #007bff;
+      color: #fff;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+
+    .footer-note {
+      margin-top: 25px;
+      font-size: 0.9em;
+      color: #777;
+    }
+
+    .invoice-details {
+      text-align: left;
+      margin-top: 20px;
+    }
+
+    .invoice-details p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📄</div>
+    <h1>Your Invoice is Ready!</h1>
+    <p>Hello <strong>{{username}}</strong>,</p>
+    <p>Your invoice <strong>#{{invoiceNumber}}</strong> has been successfully created.</p>
+
+    <div class="invoice-details">
+      <p><strong>Total Amount:</strong> ${{totalAmount}}</p>
+      <p><strong>Status:</strong> Paid / Pending / Draft (You can dynamically insert this)</p>
+    </div>
+
+    <a href="{{viewInvoiceLink}}" class="btn">View Invoice Online</a>
+
+    <p class="footer-note">A copy of your invoice has also been attached to this email in PDF format.</p>
+    <p class="footer-note">If you have any questions, please contact our support team.</p>
+  </div>
+</body>
+</html>

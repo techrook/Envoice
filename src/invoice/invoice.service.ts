@@ -2,10 +2,16 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/create-invoice-dto';
 import { CONSTANT } from '../common/constants';
+import EventsManager from 'src/common/events/events.manager';
+import PDFDocument from 'pdfkit';
+import { Buffer } from 'buffer';
 
 @Injectable()
 export class InvoiceService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventsManager: EventsManager // Replace 'any' with the actual type of eventsManager
+  ) {}
 
   async createInvoice(userId: string, createInvoiceDto: CreateInvoiceDto) {
     const { clientId, items, ...invoiceData } = createInvoiceDto;
@@ -23,12 +29,11 @@ export class InvoiceService {
     const client = await this.prisma.client.findUnique({
       where: { id: clientId },
     });
-
     if (!client || client.userId !== userId) {
       throw new ForbiddenException(CONSTANT.CLIENT_CREATE_FORBIDDEN);
     }
 
-    // Generate invoice number (using timestamp and a random component)
+
     const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000000)}`;
 
     // Calculate total amount
@@ -42,10 +47,12 @@ export class InvoiceService {
     const invoice = await this.prisma.invoice.create({
       data: {
         ...invoiceData,
-        invoiceNumber, // Use the generated invoice number
+        issueDate:new Date(invoiceData.issueDate),
+        dueDate:new Date(invoiceData.dueDate),
+        invoiceNumber,
         totalAmount,
-        userId, // Scalar field
-        clientId, // Scalar field
+        userId, 
+        clientId, 
         items: {
           create: items.map((item) => ({
             description: item.description,
@@ -62,6 +69,8 @@ export class InvoiceService {
         items: true, // This will include the invoice items
       },
     });
+
+    await this.eventsManager.onInvoiceCreated(userId,clientId, invoice);
 
     return invoice;
   }
@@ -137,6 +146,8 @@ export class InvoiceService {
       include: { items: true }, // Return updated items
     });
 
+
+
     return updatedInvoice;
   }
 
@@ -166,5 +177,60 @@ export class InvoiceService {
     });
 
     return { message: CONSTANT.INVOICE_DELETE_SUCCESS };
+  }
+
+  async generate(invoice: any): Promise<Buffer> {
+    const doc = new PDFDocument();
+    const buffers: Uint8Array[] = [];
+
+    doc.on('data', buffers.push.bind(buffers));
+    doc.on('end', () => {});
+
+    // Header
+    doc.fontSize(20).text(`Invoice ${invoice.invoiceNumber}`, { align: 'center' });
+    doc.moveDown();
+
+    // Dates
+    doc.fontSize(12).text(`Issue Date: ${invoice.issueDate}`);
+    doc.text(`Due Date: ${invoice.dueDate}`);
+    doc.moveDown();
+
+    // Table Header
+    doc.font('Helvetica-Bold');
+    doc.text('Description', 50, doc.y);
+    doc.text('Qty', 300, doc.y);
+    doc.text('Unit Price', 350, doc.y);
+    doc.text('Discount', 430, doc.y);
+    doc.text('Amount', 500, doc.y);
+    doc.moveDown();
+    doc.font('Helvetica');
+
+    // Items
+    invoice.items.forEach((item: any) => {
+      doc.text(item.description, 50, doc.y);
+      doc.text(item.quantity.toString(), 300, doc.y);
+      doc.text(`$${item.unitPrice.toFixed(2)}`, 350, doc.y);
+      doc.text(`$${item.discount.toFixed(2)}`, 430, doc.y);
+      doc.text(`$${item.amount.toFixed(2)}`, 500, doc.y);
+      doc.moveDown();
+    });
+
+    // Total
+    doc.moveDown();
+    doc.font('Helvetica-Bold').text(`Total Amount: $${invoice.totalAmount.toFixed(2)}`, {
+      align: 'right',
+    });
+
+    // Notes
+    doc.moveDown().font('Helvetica').fontSize(10).text(`Notes: ${invoice.notes || '-'}`);
+
+    doc.end();
+
+    return new Promise((resolve) => {
+      doc.on('end', () => {
+        const finalBuffer = Buffer.concat(buffers);
+        resolve(finalBuffer);
+      });
+    });
   }
 }
