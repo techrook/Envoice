@@ -164,4 +164,44 @@ export class EmailService {
       });
     }
   }
+  async sendInvoiceToUserAndClient(user: User, client: User, invoice: any, pdfBuffer: Buffer) {
+    try {
+      const subject = `Invoice ${invoice.invoiceNumber}`;
+      const htmlTemplate = this.prepMailContent('invoiceNotification.html');
+  
+      const htmlContent = htmlTemplate
+        .replace('{{username}}', AppUtilities.capitalizeFirstLetter(user.username))
+        .replace('{{invoiceNumber}}', invoice.invoiceNumber)
+        .replace('{{totalAmount}}', invoice.totalAmount.toFixed(2));
+  
+      const emailOptions = {
+        from: `${MAIL.noreply}`,
+        subject,
+        html: htmlContent,
+        attachments: [
+          {
+            filename: `${invoice.invoiceNumber}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ],
+      };
+  
+      // Send to user
+      await this.mailerService.sendMail({
+        to: user.email,
+        ...emailOptions,
+      });
+  
+      // Send to client
+      await this.mailerService.sendMail({
+        to: client.email,
+        ...emailOptions,
+      });
+    } catch (err) {
+      this.logger.error('Error sending invoice email:', err);
+      throw new BadRequestException({ status: 403, error: CONSTANT.OOPS });
+    }
+  }
+  
 }
