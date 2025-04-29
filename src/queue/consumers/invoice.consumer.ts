@@ -28,6 +28,7 @@ export class InvoiceConsumer extends IBaseWoker {
           `Processing invoice creation for user ${userId} and client ${clientId}`,
         );
 
+        console.log(invoice)
         // 1. Fetch user and client info
         const [user, client] = await Promise.all([
           this.prisma.user.findUnique({ where: { id: userId } }),

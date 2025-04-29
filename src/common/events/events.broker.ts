@@ -109,6 +109,7 @@ export class EventBroker {
   @OnEvent(onInvoiceCreated)
   async handleInvoiceCreated(event) {
     const { userId, clientId, invoice } = event;
+    console.log(event)
     await this.invoiceQ.add(onInvoiceCreated, {
       userId,
       clientId,

@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/create-invoice-dto';
 import { CONSTANT } from '../common/constants';
 import EventsManager from 'src/common/events/events.manager';
-import PDFDocument from 'pdfkit';
+import PDFDocument = require('pdfkit');
 import { Buffer } from 'buffer';
 
 @Injectable()
@@ -182,55 +182,58 @@ export class InvoiceService {
   async generate(invoice: any): Promise<Buffer> {
     const doc = new PDFDocument();
     const buffers: Uint8Array[] = [];
-
-    doc.on('data', buffers.push.bind(buffers));
-    doc.on('end', () => {});
-
-    // Header
-    doc.fontSize(20).text(`Invoice ${invoice.invoiceNumber}`, { align: 'center' });
-    doc.moveDown();
-
-    // Dates
-    doc.fontSize(12).text(`Issue Date: ${invoice.issueDate}`);
-    doc.text(`Due Date: ${invoice.dueDate}`);
-    doc.moveDown();
-
-    // Table Header
-    doc.font('Helvetica-Bold');
-    doc.text('Description', 50, doc.y);
-    doc.text('Qty', 300, doc.y);
-    doc.text('Unit Price', 350, doc.y);
-    doc.text('Discount', 430, doc.y);
-    doc.text('Amount', 500, doc.y);
-    doc.moveDown();
-    doc.font('Helvetica');
-
-    // Items
-    invoice.items.forEach((item: any) => {
-      doc.text(item.description, 50, doc.y);
-      doc.text(item.quantity.toString(), 300, doc.y);
-      doc.text(`$${item.unitPrice.toFixed(2)}`, 350, doc.y);
-      doc.text(`$${item.discount.toFixed(2)}`, 430, doc.y);
-      doc.text(`$${item.amount.toFixed(2)}`, 500, doc.y);
-      doc.moveDown();
-    });
-
-    // Total
-    doc.moveDown();
-    doc.font('Helvetica-Bold').text(`Total Amount: $${invoice.totalAmount.toFixed(2)}`, {
-      align: 'right',
-    });
-
-    // Notes
-    doc.moveDown().font('Helvetica').fontSize(10).text(`Notes: ${invoice.notes || '-'}`);
-
-    doc.end();
-
-    return new Promise((resolve) => {
+  
+    doc.on('data', (chunk) => buffers.push(chunk));
+  
+    return new Promise((resolve, reject) => {
       doc.on('end', () => {
         const finalBuffer = Buffer.concat(buffers);
         resolve(finalBuffer);
       });
+  
+      doc.on('error', (err) => {
+        reject(err);
+      });
+  
+      // Header
+      doc.fontSize(20).text(`Invoice ${invoice.invoiceNumber}`, { align: 'center' });
+      doc.moveDown();
+  
+      // Dates
+      doc.fontSize(12).text(`Issue Date: ${invoice.issueDate}`);
+      doc.text(`Due Date: ${invoice.dueDate}`);
+      doc.moveDown();
+  
+      // Table Header
+      doc.font('Helvetica-Bold');
+      doc.text('Description', 50, doc.y);
+      doc.text('Qty', 300, doc.y);
+      doc.text('Unit Price', 350, doc.y);
+      doc.text('Discount', 430, doc.y);
+      doc.text('Amount', 500, doc.y);
+      doc.moveDown();
+      doc.font('Helvetica');
+  
+      // Items
+      invoice.items.forEach((item: any) => {
+        doc.text(item.description, 50, doc.y);
+        doc.text(item.quantity.toString(), 300, doc.y);
+        doc.text(`$${item.unitPrice.toFixed(2)}`, 350, doc.y);
+        doc.text(`$${item.discount.toFixed(2)}`, 430, doc.y);
+        doc.text(`$${item.amount.toFixed(2)}`, 500, doc.y);
+        doc.moveDown();
+      });
+  
+      // Total
+      doc.moveDown();
+      doc.font('Helvetica-Bold').text(`Total Amount: $${invoice.totalAmount.toFixed(2)}`, {
+        align: 'right',
+      });
+  
+      // Notes
+      doc.moveDown().font('Helvetica').fontSize(10).text(`Notes: ${invoice.notes || '-'}`);
+  
+      doc.end(); // <- This must be at the end of all content writing
     });
   }
 }
