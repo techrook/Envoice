@@ -60,7 +60,6 @@ class EventsManager {
   }
 
   public onInvoiceCreated(userId: string, clientId:string, invoice: object) {
-    console.log(invoice)
     return this.eventEmitter.emit(onInvoiceCreated,new InvoiceCreatedEvent(userId,clientId, invoice))
   }
 }

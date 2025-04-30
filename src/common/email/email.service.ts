@@ -170,6 +170,7 @@ export class EmailService {
   }
   async sendInvoiceToUser(user: User,client:Client, invoice: Invoice,pdfBuffer: Buffer) {
     try {
+      console.log("email",client)
       const htmlTemplate = this.prepMailContent('invoiceNotification.html');
       const htmlContent = htmlTemplate
         .replace('{{username}}', AppUtilities.capitalizeFirstLetter(client.name))
