@@ -10,6 +10,7 @@ import EventsManager from 'src/common/events/events.manager';
 import PDFDocument = require('pdfkit');
 import { Buffer } from 'buffer';
 import axios from 'axios';
+import { Client, User } from '@prisma/client';
 @Injectable()
 export class InvoiceService {
   constructor(
@@ -183,7 +184,7 @@ export class InvoiceService {
 
     return { message: CONSTANT.INVOICE_DELETE_SUCCESS };
   }
-  async generate(invoice: any, user: any, client: any): Promise<Buffer> {
+  async generate(invoice: any, user: User, client: Client): Promise<Buffer> {
     const doc = new PDFDocument({ margin: 50 });
     const buffers: Uint8Array[] = [];
 
@@ -199,10 +200,21 @@ export class InvoiceService {
 
       // Optional Logo (from Cloudinary URL)
       try {
-        if (user.logo) {
-          const response = await axios.get(user.logo, {
+        var businessProfile
+        if (user) {
+           businessProfile = await this.prisma.businessProfile.findFirst({
+            where:{
+              userId:user.id
+            }
+          })
+          const response = await axios.get(`${businessProfile.logo}`, {
             responseType: 'arraybuffer',
+            headers: {
+              'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            },
           });
+          console.log(response)          
           const imageBuffer = Buffer.from(response.data, 'binary');
           doc.image(imageBuffer, 50, 45, { width: 100 });
         }
@@ -213,11 +225,11 @@ export class InvoiceService {
       // Business Information (User)
       doc
         .fontSize(20)
-        .text(user.name || 'Your Business Name', 200, 50, { align: 'right' })
+        .text(businessProfile.name || 'Your Business Name', 200, 50, { align: 'right' })
         .fontSize(10)
-        .text(user.location || '', { align: 'right' })
-        .text(user.contact || '', { align: 'right' })
-        .text(`User ID: ${user.userId || 'N/A'}`, { align: 'right' })
+        .text(businessProfile.location || '', { align: 'right' })
+        .text(businessProfile.contact || '', { align: 'right' })
+        .text(`User ID: ${businessProfile.userId || 'N/A'}`, { align: 'right' })
         .moveDown();
 
       // Invoice title
