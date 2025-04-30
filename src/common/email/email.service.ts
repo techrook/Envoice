@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { CONSTANT, MAIL } from '../constants';
 import { AppUtilities } from 'src/app.utilities';
-import { User } from '@prisma/client';
+import { Client, Invoice, User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import AppLogger from '../log/logger.config';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -168,18 +168,14 @@ export class EmailService {
       });
     }
   }
-  async sendInvoiceToUser(user: User, invoice: any,pdfBuffer: Buffer) {
+  async sendInvoiceToUser(user: User,client:Client, invoice: Invoice,pdfBuffer: Buffer) {
     try {
-      // 1. Generate PDF
-
-  
-      // 2. Load and prepare HTML email template
       const htmlTemplate = this.prepMailContent('invoiceNotification.html');
       const htmlContent = htmlTemplate
-        .replace('{{username}}', AppUtilities.capitalizeFirstLetter(user.username))
+        .replace('{{username}}', AppUtilities.capitalizeFirstLetter(client.name))
         .replace('{{invoiceNumber}}', invoice.invoiceNumber)
         .replace('{{totalAmount}}', invoice.totalAmount.toFixed(2))
-        .replace('{{viewInvoiceLink}}', `${this.cfg.get('FRONTEND_URL')}/invoices/${invoice.id}`);
+        .replace('{{status}}', `${invoice.status}`);
   
       // 3. Build attachment
       const attachments = [

@@ -44,7 +44,7 @@ export class InvoiceConsumer extends IBaseWoker {
         const pdfBuffer = await this.invoiceService.generate(invoice); // implement this service
 
         // 3. Send Email
-        await this.emailService.sendInvoiceToUser(user, invoice, pdfBuffer);
+        await this.emailService.sendInvoiceToUser(user,client, invoice, pdfBuffer);
 
         break;
       }
