@@ -116,3 +116,7 @@ enum InvoiceStatus {
   PAID
   OVERDUE
 }
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
