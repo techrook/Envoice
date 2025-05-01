@@ -104,9 +104,10 @@ model InvoiceItem {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   description String
   quantity    Int
-  unitPrice   Float     // Use Float instead of Decimal
-  discount    Float     @default(0) // Percentage discount (e.g., 10 for 10%)
-  amount      Float     @default(0) // Final amount after applying discount
+  unitPrice   Float
+  discount    Float     @default(0) // Either percentage or fixed amount
+  isPercentageDiscount Boolean     @default(true) // If false, discount is fixed
+  amount      Float     @default(0) // Final item amount after discount
   invoiceId   String    @db.ObjectId
   invoice     Invoice   @relation(fields: [invoiceId], references: [id])
 }

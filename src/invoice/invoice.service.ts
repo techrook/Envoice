@@ -21,7 +21,7 @@ export class InvoiceService {
   async createInvoice(userId: string, createInvoiceDto: CreateInvoiceDto) {
     const { clientId, items, ...invoiceData } = createInvoiceDto;
 
-    // Check for business profile
+
     const businessProfile = await this.prisma.businessProfile.findUnique({
       where: { userId },
     });
@@ -30,7 +30,6 @@ export class InvoiceService {
       throw new ForbiddenException(CONSTANT.BUSINESS_PROFILE_REQUIRED);
     }
 
-    // Check for client ownership
     const client = await this.prisma.client.findUnique({
       where: { id: clientId },
     });
@@ -40,7 +39,6 @@ export class InvoiceService {
 
     const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000000)}`;
 
-    // Calculate total amount
     const totalAmount = items.reduce((sum, item) => {
       const discount = item.discount || 0;
       const itemAmount = item.unitPrice * item.quantity;
