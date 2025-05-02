@@ -19,33 +19,55 @@ export class InvoiceService {
   ) {}
 
   async createInvoice(userId: string, createInvoiceDto: CreateInvoiceDto) {
-    const { clientId, items, ...invoiceData } = createInvoiceDto;
-
-
+    const { clientId, items, discountType, discountValue, taxRate, taxName, ...invoiceData } = createInvoiceDto;
+  
     const businessProfile = await this.prisma.businessProfile.findUnique({
       where: { userId },
     });
-
+  
     if (!businessProfile) {
       throw new ForbiddenException(CONSTANT.BUSINESS_PROFILE_REQUIRED);
     }
-
+  
     const client = await this.prisma.client.findUnique({
       where: { id: clientId },
     });
+  
     if (!client || client.userId !== userId) {
       throw new ForbiddenException(CONSTANT.CLIENT_CREATE_FORBIDDEN);
     }
-
+  
     const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000000)}`;
-
-    const totalAmount = items.reduce((sum, item) => {
-      const discount = item.discount || 0;
-      const itemAmount = item.unitPrice * item.quantity;
-      return sum + itemAmount - (itemAmount * discount) / 100;
-    }, 0);
-
-    // Create invoice along with items
+  
+    // Step 1: Calculate item-level totals
+    const processedItems = items.map((item) => {
+      const baseAmount = item.unitPrice * item.quantity;
+      const discount = item.isPercentageDiscount
+        ? (item.discount || 0) / 100 * baseAmount
+        : item.discount || 0;
+  
+      return {
+        ...item,
+        amount: baseAmount - discount,
+      };
+    });
+  
+    const subtotal = processedItems.reduce((sum, item) => sum + item.amount, 0);
+  
+    // Step 2: Apply invoice-level discount
+    let discountedTotal = subtotal;
+  
+    if (discountType === 'PERCENTAGE') {
+      discountedTotal -= (discountValue || 0) / 100 * subtotal;
+    } else if (discountType === 'FIXED') {
+      discountedTotal -= discountValue || 0;
+    }
+  
+    // Step 3: Apply tax
+    const taxAmount = (taxRate || 0) / 100 * discountedTotal;
+    const totalAmount = discountedTotal + taxAmount;
+  
+    // Step 4: Create invoice
     const invoice = await this.prisma.invoice.create({
       data: {
         ...invoiceData,
@@ -53,29 +75,33 @@ export class InvoiceService {
         dueDate: new Date(invoiceData.dueDate),
         invoiceNumber,
         totalAmount,
+        taxRate,
+        taxName,
+        discountType,
+        discountValue,
         userId,
         clientId,
         items: {
-          create: items.map((item) => ({
+          create: processedItems.map((item) => ({
             description: item.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             discount: item.discount || 0,
-            amount:
-              item.quantity * item.unitPrice -
-              (item.quantity * item.unitPrice * (item.discount || 0)) / 100,
+            isPercentageDiscount: item.isPercentageDiscount ?? true,
+            amount: item.amount,
           })),
         },
       },
       include: {
-        items: true, // This will include the invoice items
+        items: true,
       },
     });
-
+  
     await this.eventsManager.onInvoiceCreated(userId, clientId, invoice);
-
+  
     return invoice;
   }
+  
 
   async getAllInvoices(userId: string) {
     return await this.prisma.invoice.findMany({
@@ -185,60 +211,58 @@ export class InvoiceService {
   async generate(invoice: any, user: User, client: Client): Promise<Buffer> {
     const doc = new PDFDocument({ margin: 50 });
     const buffers: Uint8Array[] = [];
-
+  
     doc.on('data', (chunk) => buffers.push(chunk));
-
+  
     return new Promise(async (resolve, reject) => {
       doc.on('end', () => {
         const finalBuffer = Buffer.concat(buffers);
         resolve(finalBuffer);
       });
-
+  
       doc.on('error', reject);
-
-      // Optional Logo (from Cloudinary URL)
+  
+      // Optional Logo (Cloudinary or URL)
+      let businessProfile: any = {};
       try {
-        var businessProfile
         if (user) {
-           businessProfile = await this.prisma.businessProfile.findFirst({
-            where:{
-              userId:user.id
-            }
-          })
-          const response = await axios.get(`${businessProfile.logo}`, {
-            responseType: 'arraybuffer',
-            headers: {
-              'User-Agent':
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            },
+          businessProfile = await this.prisma.businessProfile.findFirst({
+            where: { userId: user.id },
           });
-          console.log(response)          
-          const imageBuffer = Buffer.from(response.data, 'binary');
-          doc.image(imageBuffer, 50, 45, { width: 100 });
+  
+          if (businessProfile?.logo) {
+            const response = await axios.get(businessProfile.logo, {
+              responseType: 'arraybuffer',
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              },
+            });
+            const imageBuffer = Buffer.from(response.data, 'binary');
+            doc.image(imageBuffer, 50, 45, { width: 100 });
+          }
         }
       } catch (err) {
         console.warn('Failed to load logo:', err.message);
       }
-
-      // Business Information (User)
+  
+      // Business Info
       doc
         .fontSize(20)
-        .text(businessProfile.name || 'Your Business Name', 200, 50, { align: 'right' })
+        .text(businessProfile?.name || 'Your Business Name', 200, 50, { align: 'right' })
         .fontSize(10)
-        .text(businessProfile.location || '', { align: 'right' })
-        .text(businessProfile.contact || '', { align: 'right' })
-        .text(`User ID: ${businessProfile.userId || 'N/A'}`, { align: 'right' })
+        .text(businessProfile?.location || '', { align: 'right' })
+        .text(businessProfile?.contact || '', { align: 'right' })
+        .text(`User ID: ${businessProfile?.userId || 'N/A'}`, { align: 'right' })
         .moveDown();
-
-      // Invoice title
+  
+      // Invoice Info
       doc
         .fontSize(16)
         .text(`Invoice #${invoice.invoiceNumber}`, { align: 'left' })
-        .text(`Issue Date: ${invoice.issueDate}`)
-        .text(`Due Date: ${invoice.dueDate}`)
+        .text(`Issue Date: ${invoice.issueDate}`, { align: 'left' })
+        .text(`Due Date: ${invoice.dueDate}`, { align: 'left' })
         .moveDown();
-
-      // Client Info
+  
       // Client Info
       doc
         .fontSize(12)
@@ -246,12 +270,12 @@ export class InvoiceService {
         .font('Helvetica-Bold')
         .text(client.name)
         .font('Helvetica')
-        .text(client.email)
-        .text(client.phone)
-        .text(client.address)
+        .text(client.email || '')
+        .text(client.phone || '')
+        .text(client.address || '')
         .moveDown();
-
-      // Table Header
+  
+      // Table Headers
       const tableTop = doc.y;
       const itemSpacing = 20;
       doc.font('Helvetica-Bold');
@@ -261,47 +285,86 @@ export class InvoiceService {
         .text('Unit Price', 310, tableTop)
         .text('Discount', 390, tableTop)
         .text('Amount', 470, tableTop);
-
+  
       doc
         .moveTo(50, tableTop + 15)
         .lineTo(550, tableTop + 15)
         .stroke();
-
-      // Table Rows
+  
+      // Table Rows and Subtotal Calculation
       doc.font('Helvetica');
       let y = tableTop + 25;
-
-      invoice.items.forEach((item: any) => {
+      let subTotal = 0;
+      invoice.items?.forEach((item: any) => {
+        const description = item.description || '';
+        const quantity = item.quantity ?? 0;
+        const unitPrice = item.unitPrice ?? 0;
+        const discount = item.discount ?? 0;
+        const amount = item.amount ?? 0;
+  
+        // Subtotal is accumulated here, sum all item amounts
+        subTotal += amount;
+  
         doc
-          .text(item.description, 50, y)
-          .text(item.quantity.toString(), 260, y)
-          .text(`$${item.unitPrice.toFixed(2)}`, 310, y)
-          .text(`$${item.discount.toFixed(2)}`, 390, y)
-          .text(`$${item.amount.toFixed(2)}`, 470, y);
+          .text(description, 50, y)
+          .text(quantity.toString(), 260, y)
+          .text(`$${unitPrice.toFixed(2)}`, 310, y)
+          .text(`$${discount.toFixed(2)}`, 390, y)
+          .text(`$${amount.toFixed(2)}`, 470, y);
         y += itemSpacing;
       });
-
-      // Summary
+  
+      // Summary Section
       y += 10;
       doc.moveTo(350, y).lineTo(550, y).stroke();
+      doc.font('Helvetica');
+  
+      // Display Subtotal
+      doc.text(`Subtotal: $${(subTotal ?? 0).toFixed(2)}`, 400, y + 10, { align: 'right' });
+  
+      // Discount Logic (if applicable)
+      if (invoice.invoiceDiscount && invoice.invoiceDiscount > 0) {
+        const discountLabel =
+          invoice.discountType === 'PERCENTAGE'
+            ? `${invoice.discountValue ?? 0}%`
+            : `$${(invoice.discountValue ?? 0).toFixed(2)}`;
+  
+        doc.text(
+          `Discount (${discountLabel}): -$${(invoice.invoiceDiscount ?? 0).toFixed(2)}`,
+          400,
+          doc.y + 5,
+          { align: 'right' }
+        );
+      }
+  
+      // Tax Logic (if applicable)
+      if (invoice.taxAmount && invoice.taxAmount > 0) {
+        doc.text(
+          `${invoice.taxName || 'Tax'} (${invoice.taxRate ?? 0}%): $${(invoice.taxAmount ?? 0).toFixed(2)}`,
+          400,
+          doc.y + 5,
+          { align: 'right' }
+        );
+      }
+  
+      // Total Amount (final total)
       doc
         .font('Helvetica-Bold')
-        .text(`Total: $${invoice.totalAmount.toFixed(2)}`, 400, y + 10, {
+        .text(`Total: $${(invoice.totalAmount ?? 0).toFixed(2)}`, 400, doc.y + 10, {
           align: 'right',
         });
-
-      // Notes
+  
+      // Notes Section
       doc
         .moveDown()
         .fontSize(10)
         .fillColor('#888888')
-        .text(
-          `Notes: ${invoice.notes || 'Thank you for your business!'}`,
-          50,
-          y + 60,
-        );
-
+        .text(`Notes: ${invoice.notes || 'Thank you for your business!'}`, 50, y + 60);
+  
       doc.end();
     });
   }
+  
+  
 }
+  

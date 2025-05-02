@@ -28,23 +28,30 @@ export class InvoiceConsumer extends IBaseWoker {
           `Processing invoice creation for user ${userId} and client ${clientId}`,
         );
 
-        
         // 1. Fetch user and client info
         const [user, client] = await Promise.all([
           this.prisma.user.findUnique({ where: { id: userId } }),
           this.prisma.client.findUnique({ where: { id: clientId } }),
         ]);
-console.log("consumer",client)
         if (!user || !client) {
           this.log.error(`User or client not found`);
           return;
         }
 
         // 2. Generate PDF
-        const pdfBuffer = await this.invoiceService.generate(invoice,user,client); // implement this service
+        const pdfBuffer = await this.invoiceService.generate(
+          invoice,
+          user,
+          client,
+        ); // implement this service
 
         // 3. Send Email
-        await this.emailService.sendInvoiceToUser(user,client, invoice, pdfBuffer);
+        await this.emailService.sendInvoiceToUser(
+          user,
+          client,
+          invoice,
+          pdfBuffer,
+        );
 
         break;
       }
