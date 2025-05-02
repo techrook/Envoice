@@ -1,6 +1,24 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsArray, IsOptional, IsDateString, ValidateNested } from 'class-validator';
+import { 
+  ApiProperty, 
+  PartialType 
+} from '@nestjs/swagger';
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  IsOptional,
+  IsDateString,
+  ValidateNested,
+  IsNumber,
+  IsBoolean,
+  IsEnum
+} from 'class-validator';
 import { Type } from 'class-transformer';
+
+export enum DiscountType {
+  PERCENTAGE = 'PERCENTAGE',
+  FIXED = 'FIXED',
+}
 
 class InvoiceItemDto {
   @ApiProperty()
@@ -10,15 +28,23 @@ class InvoiceItemDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsNumber()
   quantity: number;
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsNumber()
   unitPrice: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
+  @IsNumber()
   discount?: number;
+
+  @ApiProperty({ required: false, default: true })
+  @IsOptional()
+  @IsBoolean()
+  isPercentageDiscount?: boolean;
 }
 
 export class CreateInvoiceDto {
@@ -35,7 +61,7 @@ export class CreateInvoiceDto {
   @IsDateString()
   dueDate: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   notes?: string;
@@ -45,6 +71,26 @@ export class CreateInvoiceDto {
   @ValidateNested({ each: true })
   @Type(() => InvoiceItemDto)
   items: InvoiceItemDto[];
+
+  @ApiProperty({ enum: DiscountType, required: false })
+  @IsOptional()
+  @IsEnum(DiscountType)
+  discountType?: DiscountType;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  discountValue?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  taxRate?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  taxName?: string;
 }
 
 class UpdateInvoiceItemDto {
@@ -53,13 +99,20 @@ class UpdateInvoiceItemDto {
   description?: string;
 
   @IsOptional()
+  @IsNumber()
   quantity?: number;
 
   @IsOptional()
+  @IsNumber()
   unitPrice?: number;
 
   @IsOptional()
+  @IsNumber()
   discount?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isPercentageDiscount?: boolean;
 }
 
 export class UpdateInvoiceDto {
@@ -74,6 +127,22 @@ export class UpdateInvoiceDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsEnum(DiscountType)
+  discountType?: DiscountType;
+
+  @IsOptional()
+  @IsNumber()
+  discountValue?: number;
+
+  @IsOptional()
+  @IsNumber()
+  taxRate?: number;
+
+  @IsOptional()
+  @IsString()
+  taxName?: string;
 
   @IsOptional()
   @IsArray()

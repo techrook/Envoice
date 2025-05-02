@@ -62,5 +62,30 @@ export class AppUtilities {
   public static capitalizeFirstLetter(value: string): string {
     return value.charAt(0).toUpperCase() + value.slice(1);
   }
+  public static  calculateInvoiceTotal(items, taxRate, discountType, discountValue) {
+    let subtotal = 0;
+    for (const item of items) {
+      const itemTotal = item.unitPrice * item.quantity;
+      const discount = item.isPercentageDiscount
+        ? itemTotal * (item.discount / 100)
+        : item.discount;
+      item.amount = itemTotal - discount;
+      subtotal += item.amount;
+    }
+  
+    // Apply invoice-level discount
+    let discountedTotal = subtotal;
+    if (discountType === 'PERCENTAGE') {
+      discountedTotal -= subtotal * (discountValue / 100);
+    } else if (discountType === 'FIXED') {
+      discountedTotal -= discountValue;
+    }
+  
+    // Apply tax
+    const tax = discountedTotal * (taxRate / 100);
+    const totalAmount = discountedTotal + tax;
+  
+    return totalAmount;
+  }
 }
 

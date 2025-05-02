@@ -194,6 +194,13 @@ export class EmailService {
         content: htmlContent,
         attachments,
       });
+      await this.dispatchMail({
+        email: client.email,
+        username: client.name,
+        subject: `Invoice #${invoice.invoiceNumber} from Envoice`,
+        content: htmlContent,
+        attachments,
+      });
     } catch (error) {
       this.logger.error('Failed to send invoice email', error);
       throw new BadRequestException({
