@@ -237,7 +237,7 @@ export class InvoiceService {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
               },
             });
-            const imageBuffer = Buffer.from(response.data, 'binary');
+            const imageBuffer = Buffer.from(response.data as ArrayBuffer);
             doc.image(imageBuffer, 50, 45, { width: 100 });
           }
         }

@@ -9,20 +9,17 @@ export declare class InvoiceService {
     constructor(prisma: PrismaService, eventsManager: EventsManager);
     createInvoice(userId: string, createInvoiceDto: CreateInvoiceDto): Promise<{
         items: {
-            description: string;
             id: string;
+            amount: number;
+            description: string;
             quantity: number;
             unitPrice: number;
             discount: number;
             isPercentageDiscount: boolean;
-            amount: number;
             invoiceId: string;
         }[];
     } & {
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
-        userId: string;
         invoiceNumber: string;
         issueDate: Date;
         dueDate: Date;
@@ -33,34 +30,34 @@ export declare class InvoiceService {
         discountType: import(".prisma/client").$Enums.DiscountType | null;
         discountValue: number | null;
         totalAmount: number;
+        userId: string;
         clientId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     getAllInvoices(userId: string): Promise<({
-        items: {
-            description: string;
+        client: {
             id: string;
+            userId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            email: string;
+            phone: string;
+            address: string;
+        };
+        items: {
+            id: string;
+            amount: number;
+            description: string;
             quantity: number;
             unitPrice: number;
             discount: number;
             isPercentageDiscount: boolean;
-            amount: number;
             invoiceId: string;
         }[];
-        client: {
-            email: string;
-            createdAt: Date;
-            id: string;
-            updatedAt: Date;
-            name: string;
-            userId: string;
-            phone: string;
-            address: string;
-        };
     } & {
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
-        userId: string;
         invoiceNumber: string;
         issueDate: Date;
         dueDate: Date;
@@ -71,34 +68,34 @@ export declare class InvoiceService {
         discountType: import(".prisma/client").$Enums.DiscountType | null;
         discountValue: number | null;
         totalAmount: number;
+        userId: string;
         clientId: string;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     getInvoiceById(userId: string, invoiceId: string): Promise<{
-        items: {
-            description: string;
+        client: {
             id: string;
+            userId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            email: string;
+            phone: string;
+            address: string;
+        };
+        items: {
+            id: string;
+            amount: number;
+            description: string;
             quantity: number;
             unitPrice: number;
             discount: number;
             isPercentageDiscount: boolean;
-            amount: number;
             invoiceId: string;
         }[];
-        client: {
-            email: string;
-            createdAt: Date;
-            id: string;
-            updatedAt: Date;
-            name: string;
-            userId: string;
-            phone: string;
-            address: string;
-        };
     } & {
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
-        userId: string;
         invoiceNumber: string;
         issueDate: Date;
         dueDate: Date;
@@ -109,24 +106,24 @@ export declare class InvoiceService {
         discountType: import(".prisma/client").$Enums.DiscountType | null;
         discountValue: number | null;
         totalAmount: number;
+        userId: string;
         clientId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     updateInvoice(userId: string, invoiceId: string, updateInvoiceDto: UpdateInvoiceDto): Promise<{
         items: {
-            description: string;
             id: string;
+            amount: number;
+            description: string;
             quantity: number;
             unitPrice: number;
             discount: number;
             isPercentageDiscount: boolean;
-            amount: number;
             invoiceId: string;
         }[];
     } & {
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
-        userId: string;
         invoiceNumber: string;
         issueDate: Date;
         dueDate: Date;
@@ -137,7 +134,10 @@ export declare class InvoiceService {
         discountType: import(".prisma/client").$Enums.DiscountType | null;
         discountValue: number | null;
         totalAmount: number;
+        userId: string;
         clientId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     deleteInvoice(userId: string, invoiceId: string): Promise<{
         message: string;
