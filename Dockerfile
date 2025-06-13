@@ -1,23 +1,23 @@
-# Use official Node.js LTS image
-FROM node:18-alpine
+# Use an official Node.js image
+FROM node:18
 
-# Set working directory inside container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json first to install dependencies
+# Copy package files
 COPY package*.json ./
 
-# Install only production dependencies if NODE_ENV is production
-RUN npm install
+# Use legacy peer deps to avoid version conflict
+RUN npm install --legacy-peer-deps
 
-# Copy the entire project
+# Copy the rest of the app
 COPY . .
 
-# Build the NestJS project
+# Build the app
 RUN npm run build
 
-# Expose port (change if you're using another)
+# Expose port
 EXPOSE 3000
 
-# Start the app in production mode
-CMD ["npm", "run", "start:prod"]
+# Start the app
+CMD ["npm", "run", "start"]
