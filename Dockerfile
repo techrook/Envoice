@@ -1,23 +1,26 @@
-# Use an official Node.js image
-FROM node:18
+# 1. Use official Node.js image as base
+FROM node:20-alpine
 
-# Set working directory
-WORKDIR /app
+# 2. Set working directory
+WORKDIR /usr/src/app
 
-# Copy package files
+# 3. Copy package files first for better caching
 COPY package*.json ./
 
-# Use legacy peer deps to avoid version conflict
-RUN npm install --legacy-peer-deps
+# 4. Install dependencies (install both runtime and dev deps for build)
+RUN npm install
 
-# Copy the rest of the app
+# 5. Copy rest of the application
 COPY . .
 
-# Build the app
+# 6. Generate Prisma client
+RUN npx prisma generate
+
+# 7. Build the NestJS application
 RUN npm run build
 
-# Expose port
+# 8. Expose application port (default NestJS port)
 EXPOSE 3000
 
-# Start the app
-CMD ["npm", "run", "start"]
+# 9. Set the command to run the application in production mode
+CMD ["npm", "run", "start:prod"]
