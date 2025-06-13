@@ -22,31 +22,41 @@ async function bootstrap() {
     }),
   );
   const logger = app.get(AppLogger);
-  const port = configService.get('port');
+  const port = process.env.PORT || configService.get('port') || 4567;
   const appName = configService.get('appName');
   const appVersion = configService.get('version');
   const appHost = configService.get('host');
 
   const initSwagger = (app: INestApplication, serverUrl: string) => {
+    // Add CSP header for just the /api-docs route
+    app.use('/api-docs', (req, res, next) => {
+      res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+      );
+      next();
+    });
+  
     const config = new DocumentBuilder()
       .setTitle(appName)
       .setDescription(appName)
       .setVersion(appVersion)
       .addServer(serverUrl, 'Development Server')
-
       .addBearerAuth();
-
+  
     for (const ApiTagName in AppApiTags) {
       config.addTag(ApiTagName, AppApiTags[ApiTagName].description);
     }
+  
     const document = SwaggerModule.createDocument(app, config.build());
-
+  
     SwaggerModule.setup('/api-docs', app, document, {
       swaggerOptions: {
         persistAuthorization: true,
       },
     });
   };
+  
 
   logger.log(`Starting [${configService.get('appName')}] on port=[${port}]`);
   initSwagger(app, appHost);

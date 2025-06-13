@@ -20,11 +20,15 @@ async function bootstrap() {
         transformOptions: { enableImplicitConversion: true },
     }));
     const logger = app.get(logger_config_1.default);
-    const port = configService.get('port');
+    const port = process.env.PORT || configService.get('port') || 4567;
     const appName = configService.get('appName');
     const appVersion = configService.get('version');
     const appHost = configService.get('host');
     const initSwagger = (app, serverUrl) => {
+        app.use('/api-docs', (req, res, next) => {
+            res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline';");
+            next();
+        });
         const config = new swagger_1.DocumentBuilder()
             .setTitle(appName)
             .setDescription(appName)
