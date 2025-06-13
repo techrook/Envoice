@@ -20,7 +20,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # 8. Expose application port (default NestJS port)
-EXPOSE 3000
+EXPOSE 4567
 
 # 9. Set the command to run the application in production mode
 CMD ["npm", "run", "start:prod"]
