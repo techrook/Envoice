@@ -100,7 +100,7 @@ export class EmailService {
         where: { id: user.id },
         data: { verifiedToken: token },
       });
-      const resetUrl = `${this.cfg.get('app')}/auth/change-password?token=${token}`;
+      const resetUrl = `${this.cfg.get('FRONTEND_URL')}/auth/change-password?token=${token}`;
 
       const htmlTemplate = this.prepMailContent('reqPasswordReset.html');
       const htmlContent = htmlTemplate
