@@ -101,11 +101,12 @@ export class EmailService {
         data: { verifiedToken: token },
       });
       const resetUrl = `${this.cfg.get('FRONTEND_URL')}/auth/change-password?token=${token}`;
-
+      console.log(resetUrl)
       const htmlTemplate = this.prepMailContent('reqPasswordReset.html');
       const htmlContent = htmlTemplate
-        .replace('{{resetUrl}}', resetUrl)
-        .replace('{{username}}', user.username);
+  .replace(/{{resetUrl}}/g, resetUrl)
+  .replace(/{{username}}/g, user.username);
+
 
       const opts = {
         subject: MAIL.passwordReset,
