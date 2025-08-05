@@ -62,6 +62,9 @@ let UsersService = class UsersService extends crud_service_1.CrudService {
             value: identity,
         });
     }
+    async findById(id) {
+        return this.getBy({ field: 'id', value: id });
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

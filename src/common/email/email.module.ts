@@ -5,6 +5,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from 'src/auth/JWT Strategy/jwt.strategy';
+import { UsersService } from 'src/users/users.service';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { JwtStrategy } from 'src/auth/JWT Strategy/jwt.strategy';
       }),
     }),
   ],
-  providers: [EmailService, PrismaService,JwtStrategy],
+  providers: [EmailService, PrismaService,JwtStrategy,UsersService],
 })
 export class EmailModule {}

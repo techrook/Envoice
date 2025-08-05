@@ -13,6 +13,7 @@ const config_1 = require("@nestjs/config");
 const mailer_1 = require("@nestjs-modules/mailer");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const jwt_strategy_1 = require("../../auth/JWT Strategy/jwt.strategy");
+const users_service_1 = require("../../users/users.service");
 let EmailModule = class EmailModule {
 };
 exports.EmailModule = EmailModule;
@@ -36,7 +37,7 @@ exports.EmailModule = EmailModule = __decorate([
                 }),
             }),
         ],
-        providers: [email_service_1.EmailService, prisma_service_1.PrismaService, jwt_strategy_1.JwtStrategy],
+        providers: [email_service_1.EmailService, prisma_service_1.PrismaService, jwt_strategy_1.JwtStrategy, users_service_1.UsersService],
     })
 ], EmailModule);
 //# sourceMappingURL=email.module.js.map

@@ -68,4 +68,7 @@ export class UsersService extends CrudService<
       value: identity as string,
     });
   }
+  async findById(id: string) {
+    return this.getBy({ field: 'id', value: id });
+  }
 }
