@@ -9,6 +9,7 @@ import {
   Req,
   UseInterceptors,
   UploadedFile,
+  Delete,
 } from '@nestjs/common';
 import { BusinessProfileService } from './business-profile.service';
 import {
@@ -66,4 +67,13 @@ export class BusinessProfileController {
     const userId = req.user.id;
     return this.businessProfileService.getBusinessProfile(userId);
   }
+
+  @ApiOperation({summary: "Delete Business Profile"})
+  @UseGuards(JwtAuthGuard)
+  @Delete('')
+  async deleteBusinessProfile(@Req() req: any){
+    const userId = req.user.id;
+    return this.businessProfileService.deleteBusinessProfile(userId);
+  }
+  
 }

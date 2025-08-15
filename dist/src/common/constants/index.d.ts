@@ -28,6 +28,7 @@ export declare const CONSTANT: {
     BUSINESS_PROFILE_REQUIRED_FOR_VIEWING: string;
     BUSINESS_PROFILE_CREATED: string;
     BUSINESS_PROFILE_UPDATED: string;
+    BUSINESS_PROFILE_DELETED: string;
     onBusinessProfileCreated: string;
     onBusinessProfileUpdated: string;
     onInvoiceCreated: string;

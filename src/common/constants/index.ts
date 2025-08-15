@@ -29,6 +29,7 @@ export const CONSTANT = {
   BUSINESS_PROFILE_REQUIRED_FOR_VIEWING: 'You must have a business profile to view clients',
   BUSINESS_PROFILE_CREATED: 'Business profile created successfully',
   BUSINESS_PROFILE_UPDATED: 'Business profile updated successfully',
+  BUSINESS_PROFILE_DELETED: 'Business profile deleted successfully',
   onBusinessProfileCreated: 'business.profile.created',
   onBusinessProfileUpdated: 'business.profile.updated',
   onInvoiceCreated: 'invoice.created',

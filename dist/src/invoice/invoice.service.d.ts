@@ -9,20 +9,20 @@ export declare class InvoiceService {
     constructor(prisma: PrismaService, eventsManager: EventsManager);
     createInvoice(userId: string, createInvoiceDto: CreateInvoiceDto): Promise<{
         items: {
-            description: string;
             id: string;
+            amount: number;
+            description: string;
             quantity: number;
             unitPrice: number;
             discount: number;
             isPercentageDiscount: boolean;
-            amount: number;
             invoiceId: string;
         }[];
     } & {
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
         userId: string;
+        createdAt: Date;
+        updatedAt: Date;
         invoiceNumber: string;
         issueDate: Date;
         dueDate: Date;
@@ -36,31 +36,31 @@ export declare class InvoiceService {
         clientId: string;
     }>;
     getAllInvoices(userId: string): Promise<({
-        items: {
-            description: string;
+        client: {
             id: string;
+            name: string;
+            email: string;
+            phone: string;
+            address: string;
+            userId: string;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+        items: {
+            id: string;
+            amount: number;
+            description: string;
             quantity: number;
             unitPrice: number;
             discount: number;
             isPercentageDiscount: boolean;
-            amount: number;
             invoiceId: string;
         }[];
-        client: {
-            email: string;
-            createdAt: Date;
-            id: string;
-            updatedAt: Date;
-            name: string;
-            userId: string;
-            phone: string;
-            address: string;
-        };
     } & {
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
         userId: string;
+        createdAt: Date;
+        updatedAt: Date;
         invoiceNumber: string;
         issueDate: Date;
         dueDate: Date;
@@ -74,31 +74,31 @@ export declare class InvoiceService {
         clientId: string;
     })[]>;
     getInvoiceById(userId: string, invoiceId: string): Promise<{
-        items: {
-            description: string;
+        client: {
             id: string;
+            name: string;
+            email: string;
+            phone: string;
+            address: string;
+            userId: string;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+        items: {
+            id: string;
+            amount: number;
+            description: string;
             quantity: number;
             unitPrice: number;
             discount: number;
             isPercentageDiscount: boolean;
-            amount: number;
             invoiceId: string;
         }[];
-        client: {
-            email: string;
-            createdAt: Date;
-            id: string;
-            updatedAt: Date;
-            name: string;
-            userId: string;
-            phone: string;
-            address: string;
-        };
     } & {
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
         userId: string;
+        createdAt: Date;
+        updatedAt: Date;
         invoiceNumber: string;
         issueDate: Date;
         dueDate: Date;
@@ -113,20 +113,20 @@ export declare class InvoiceService {
     }>;
     updateInvoice(userId: string, invoiceId: string, updateInvoiceDto: UpdateInvoiceDto): Promise<{
         items: {
-            description: string;
             id: string;
+            amount: number;
+            description: string;
             quantity: number;
             unitPrice: number;
             discount: number;
             isPercentageDiscount: boolean;
-            amount: number;
             invoiceId: string;
         }[];
     } & {
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
         userId: string;
+        createdAt: Date;
+        updatedAt: Date;
         invoiceNumber: string;
         issueDate: Date;
         dueDate: Date;

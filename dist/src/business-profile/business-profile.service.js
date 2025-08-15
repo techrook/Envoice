@@ -14,7 +14,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const constants_1 = require("../common/constants");
 const events_manager_1 = require("../common/events/events.manager");
-const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND, BUSINESS_PROFILE_CREATED, BUSINESS_PROFILE_UPDATED, } = constants_1.CONSTANT;
+const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND, BUSINESS_PROFILE_CREATED, BUSINESS_PROFILE_UPDATED, BUSINESS_PROFILE_DELETED } = constants_1.CONSTANT;
 let BusinessProfileService = class BusinessProfileService {
     constructor(prisma, eventsManager) {
         this.prisma = prisma;
@@ -63,6 +63,12 @@ let BusinessProfileService = class BusinessProfileService {
             throw new common_1.NotFoundException(BUSINESS_PROFILE_NOTFOUND);
         }
         return businessProfile;
+    }
+    async deleteBusinessProfile(userId) {
+        await this.prisma.businessProfile.delete({
+            where: { userId }
+        });
+        return BUSINESS_PROFILE_DELETED;
     }
 };
 exports.BusinessProfileService = BusinessProfileService;

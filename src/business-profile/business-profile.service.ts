@@ -7,7 +7,7 @@ import {
 import { CONSTANT } from 'src/common/constants';
 import EventsManager from 'src/common/events/events.manager';
 
-const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND,BUSINESS_PROFILE_CREATED,BUSINESS_PROFILE_UPDATED, } = CONSTANT;
+const { BUSINESS_PROFILE_EXISTS, BUSINESS_PROFILE_NOTFOUND,BUSINESS_PROFILE_CREATED,BUSINESS_PROFILE_UPDATED,BUSINESS_PROFILE_DELETED } = CONSTANT;
 
 @Injectable()
 export class BusinessProfileService {
@@ -68,5 +68,12 @@ export class BusinessProfileService {
     }
 
     return businessProfile;
+  }
+
+  async deleteBusinessProfile(userId:string){
+    await this.prisma.businessProfile.delete({
+      where:{userId}
+    })
+      return BUSINESS_PROFILE_DELETED
   }
 }

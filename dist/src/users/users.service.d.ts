@@ -11,16 +11,17 @@ export declare class UsersService extends CrudService<Prisma.UserDelegate, Users
     private readonly prisma;
     constructor(prisma: PrismaService);
     getBy(dto: IGetUserBy): Promise<{
-        id: string;
-        email: string;
         username: string | null;
+        email: string;
         password: string;
+        country: string | null;
+        createdAt: Date;
+        id: string;
         mobile: string | null;
         first_name: string | null;
         last_name: string | null;
         imageUrl: string | null;
         gender: string | null;
-        country: string | null;
         access_token: string | null;
         refresh_token: string | null;
         verifiedToken: string | null;
@@ -28,26 +29,26 @@ export declare class UsersService extends CrudService<Prisma.UserDelegate, Users
         providerId: string | null;
         lastLogin: Date | null;
         emailVerified: boolean;
-        createdAt: Date;
         updatedAt: Date;
     }>;
     createUser(dto: CreateUserDto): Promise<{
-        id: string;
-        email: string;
         username: string;
+        email: string;
+        id: string;
     }>;
     registerUser(dto: UserSignUpDto, password: string): Promise<any>;
     findUserByEmail(identity: string): Promise<{
-        id: string;
-        email: string;
         username: string | null;
+        email: string;
         password: string;
+        country: string | null;
+        createdAt: Date;
+        id: string;
         mobile: string | null;
         first_name: string | null;
         last_name: string | null;
         imageUrl: string | null;
         gender: string | null;
-        country: string | null;
         access_token: string | null;
         refresh_token: string | null;
         verifiedToken: string | null;
@@ -55,20 +56,20 @@ export declare class UsersService extends CrudService<Prisma.UserDelegate, Users
         providerId: string | null;
         lastLogin: Date | null;
         emailVerified: boolean;
-        createdAt: Date;
         updatedAt: Date;
     }>;
     findUserByUsername(identity: string): Promise<{
-        id: string;
-        email: string;
         username: string | null;
+        email: string;
         password: string;
+        country: string | null;
+        createdAt: Date;
+        id: string;
         mobile: string | null;
         first_name: string | null;
         last_name: string | null;
         imageUrl: string | null;
         gender: string | null;
-        country: string | null;
         access_token: string | null;
         refresh_token: string | null;
         verifiedToken: string | null;
@@ -76,20 +77,20 @@ export declare class UsersService extends CrudService<Prisma.UserDelegate, Users
         providerId: string | null;
         lastLogin: Date | null;
         emailVerified: boolean;
-        createdAt: Date;
         updatedAt: Date;
     }>;
     findById(id: string): Promise<{
-        id: string;
-        email: string;
         username: string | null;
+        email: string;
         password: string;
+        country: string | null;
+        createdAt: Date;
+        id: string;
         mobile: string | null;
         first_name: string | null;
         last_name: string | null;
         imageUrl: string | null;
         gender: string | null;
-        country: string | null;
         access_token: string | null;
         refresh_token: string | null;
         verifiedToken: string | null;
@@ -97,7 +98,6 @@ export declare class UsersService extends CrudService<Prisma.UserDelegate, Users
         providerId: string | null;
         lastLogin: Date | null;
         emailVerified: boolean;
-        createdAt: Date;
         updatedAt: Date;
     }>;
 }

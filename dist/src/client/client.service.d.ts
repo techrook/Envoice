@@ -4,34 +4,34 @@ export declare class ClientService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     createClient(userId: string, createClientDto: CreateClientDto): Promise<{
-        email: string;
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
         name: string;
-        userId: string;
+        email: string;
         phone: string;
         address: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     getAllClients(userId: string): Promise<{
-        email: string;
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
         name: string;
-        userId: string;
+        email: string;
         phone: string;
         address: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
     updateClient(userId: string, clientId: string, updateClientDto: UpdateClientDto): Promise<{
-        email: string;
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
         name: string;
-        userId: string;
+        email: string;
         phone: string;
         address: string;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     deleteClient(userId: string, clientId: string): Promise<{
         message: string;

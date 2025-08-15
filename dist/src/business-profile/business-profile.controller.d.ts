@@ -6,13 +6,14 @@ export declare class BusinessProfileController {
     createBusinessProfile(req: any, createBusinessProfileDto: CreateBusinessProfileDto, file: Express.Multer.File): Promise<string>;
     update(req: any, updateBusinessProfileDto: UpdateBusinessProfileDto, file: Express.Multer.File): Promise<string>;
     get(req: any): Promise<{
-        createdAt: Date;
         id: string;
-        updatedAt: Date;
-        name: string;
         userId: string;
+        name: string;
+        logo: string | null;
         location: string;
         contact: string;
-        logo: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
+    deleteBusinessProfile(req: any): Promise<string>;
 }
