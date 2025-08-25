@@ -8,14 +8,14 @@ export declare class BusinessProfileService {
     createBusinessProfile(userId: string, dto: CreateBusinessProfileDto, file?: Express.Multer.File): Promise<string>;
     updateBusinessProfile(userId: string, dto: UpdateBusinessProfileDto, file?: Express.Multer.File): Promise<string>;
     getBusinessProfile(userId: string): Promise<{
+        createdAt: Date;
         id: string;
-        userId: string;
+        updatedAt: Date;
         name: string;
-        logo: string | null;
+        userId: string;
         location: string;
         contact: string;
-        createdAt: Date;
-        updatedAt: Date;
+        logo: string | null;
     }>;
     deleteBusinessProfile(userId: string): Promise<string>;
 }

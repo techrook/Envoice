@@ -28,6 +28,7 @@ let BusinessProfileController = class BusinessProfileController {
         return this.businessProfileService.createBusinessProfile(userId, createBusinessProfileDto, file);
     }
     async update(req, updateBusinessProfileDto, file) {
+        console.log(file);
         const userId = req.user.id;
         return this.businessProfileService.updateBusinessProfile(userId, updateBusinessProfileDto, file);
     }
