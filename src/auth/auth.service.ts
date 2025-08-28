@@ -197,7 +197,7 @@ export class AuthService {
     const isUser = await this.verifyToken(
       dto.token,
     );
-    console.log("Verified User:", isUser);
+
     if (!isUser) throw new UnauthorizedException(UNAUTHORIZED);
     return await this.updatePassword(
       {
@@ -205,11 +205,10 @@ export class AuthService {
         newPassword: dto.newPassword,
       },
       isUser,
-    );
+    );    console.log("Verified User:", isUser);
   }
 
   private async updatePassword(dto: UpdatePasswordDto, id: string) {
-    console.log("Updating password for User ID:", id);
     const isMatch = AppUtilities.compareString(
       dto.newPassword,
       dto.confirmNewPassword,
@@ -226,6 +225,7 @@ export class AuthService {
         },
         data: {
           password: password,
+          verifiedToken:null
         },
       });
       console.log(updatedUser);
@@ -241,6 +241,7 @@ export class AuthService {
     return { message: PASSWORD_CHANGED };
     }
   }
+
 
   // async socialLogin(user: any) {
   //   const existingUser = await this.prisma.user.findUnique({
