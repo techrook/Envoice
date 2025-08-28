@@ -57,11 +57,12 @@ export const configuration = () => ({
   FRONTEND_URL:process.env.FRONTEND_URL,
   Queue: {
     url: process.env.REDIS_URL,
-    port: process.env.REDIS_PORT,
     host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT, 10),  // ✅ Parse as number
     user: process.env.REDIS_USERNAME,
     pass: process.env.REDIS_PASS,
-    db: process.env.REDIS_DB || 'shadow-troupe',
+    db: parseInt(process.env.REDIS_DB, 10) || 0,
+    tls: process.env.REDIS_TLS === 'true',       // ✅ Parse as boolean
   },
   Twitter:{
     consumerKey: process.env.TWITTER_CONSUMER_KEY,

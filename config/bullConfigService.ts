@@ -13,9 +13,7 @@ const { AuthQ,BusinessQ,InvoiceQ, } = CONSTANT;
         connection: {
           host: cfg.get<string>('Queue.host'),
           password: cfg.get<string>('Queue.pass'),
-          username: cfg.get<string>('Queue.user'),
           port: cfg.get<number>('Queue.port'),
-          tls: {}, 
         },
       }),
       inject: [ConfigService],
