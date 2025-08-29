@@ -15,8 +15,9 @@ import { UsersService } from 'src/users/users.service';
       useFactory: async (config: ConfigService) => ({
         transport: {
           host: config.get<string>('MAIL_HOST'),
-          port: Number(config.get<string>('MAIL_PORT')), // Ensure it's a number
-          secure: true, // Use false for port 587 (STARTTLS)
+          port: config.get<number>('MAIL_PORT'), // 587
+          secure: false, // ← Must be false for port 587
+          requireTLS: true, // ← Ensures STARTTLS is used
           auth: {
             user: config.get<string>('MAIL_USERNAME'),
             pass: config.get<string>('MAIL_PASSWORD'),

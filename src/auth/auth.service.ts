@@ -142,21 +142,15 @@ export class AuthService {
     }
   
     const accessToken = TokenUtil.signAccessToken(this.jwtService, payload.sub);
-    const newRefreshToken = TokenUtil.signRefreshToken(
-      this.jwtService,
-      payload.sub,
-    );
-  
 
-    await this.prisma.refreshToken.update({
-      where: { token: refreshToken },
+    await this.prisma.user.update({
+      where: { id: payload.sub },
       data: {
-        token: newRefreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
+        access_token: accessToken,
       },
     });
   
-    return { accessToken, refreshToken: newRefreshToken };
+    return { accessToken };
   }
   async confirmEmail(token: string) {
     const userId = await this.verifyToken(token);
