@@ -12,7 +12,12 @@ import { CONSTANT } from 'src/common/constants';
 import { AppUtilities } from 'src/app.utilities';
 import EventsManager from 'src/common/events/events.manager';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { UserSignUpDto, UserLoginDto, ResendConfirmationMailDto, ResetPasswordDto } from './dto/auth.dto';
+import {
+  UserSignUpDto,
+  UserLoginDto,
+  ResendConfirmationMailDto,
+  ResetPasswordDto,
+} from './dto/auth.dto';
 import { TokenUtil } from './jwttoken/token.util';
 import { PrismaClient } from '@prisma/client';
 import { QueuePriority } from 'src/common/events/events.interface';
@@ -56,9 +61,9 @@ export class AuthService {
 
       const password = await AppUtilities.hashPassword(dto.password);
       const user = await this.usersService.registerUser(dto, password);
-       
+
       this.eventsManager.onUserRegister(user);
-       return {
+      return {
         message: CONFIRM_MAIL_SENT(dto.email),
       };
     } catch (error) {
@@ -90,14 +95,9 @@ export class AuthService {
       const accessToken = TokenUtil.signAccessToken(this.jwtService, user.id);
       const refreshToken = TokenUtil.signRefreshToken(this.jwtService, user.id);
 
-      await this.prisma.refreshToken.create({
-        data: {
-          token: refreshToken,
-          userId: user.id,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        },
-      });
       const userId = user.id;
+      await this.storeRefreshToken(refreshToken, userId);
+
       this.eventsManager.onUserLogin({
         userId,
         accessToken,
@@ -124,23 +124,23 @@ export class AuthService {
     } catch (err) {
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN);
     }
-  
+
     const storedToken = await this.prisma.refreshToken.findUnique({
       where: { token: refreshToken },
     });
-  
+
     if (!storedToken) {
       throw new UnauthorizedException(REFRESH_TOKEN_NOTFOUND);
     }
-  
+
     if (storedToken.userId !== payload.sub) {
       throw new UnauthorizedException(REFRESH_TOKEN_NOTFORUSER);
     }
-  
+
     if (new Date() > storedToken.expiresAt) {
       throw new UnauthorizedException(REFRESH_TOKEN_EXPIRED);
     }
-  
+
     const accessToken = TokenUtil.signAccessToken(this.jwtService, payload.sub);
 
     await this.prisma.user.update({
@@ -149,18 +149,16 @@ export class AuthService {
         access_token: accessToken,
       },
     });
-  
+
     return { accessToken };
   }
   async confirmEmail(token: string) {
     const userId = await this.verifyToken(token);
 
-
     const accessToken = TokenUtil.signAccessToken(this.jwtService, userId);
     const refreshToken = TokenUtil.signRefreshToken(this.jwtService, userId);
     this.eventsManager.onEmailConfirmation(userId);
     return { accessToken, refreshToken };
-    
   }
 
   async verifyToken(token: string) {
@@ -175,7 +173,6 @@ export class AuthService {
     return user.id;
   }
 
-
   async requestPasswordReset(dto: ResendConfirmationMailDto) {
     const user = await this.usersService.findUserByEmail(dto.email);
 
@@ -188,9 +185,7 @@ export class AuthService {
   }
 
   async resetPassword(dto: ResetPasswordDto) {
-    const isUser = await this.verifyToken(
-      dto.token,
-    );
+    const isUser = await this.verifyToken(dto.token);
 
     if (!isUser) throw new UnauthorizedException(UNAUTHORIZED);
     return await this.updatePassword(
@@ -199,7 +194,7 @@ export class AuthService {
         newPassword: dto.newPassword,
       },
       isUser,
-    );    console.log("Verified User:", isUser);
+    );
   }
 
   private async updatePassword(dto: UpdatePasswordDto, id: string) {
@@ -207,41 +202,37 @@ export class AuthService {
       dto.newPassword,
       dto.confirmNewPassword,
     );
-    console.log(dto.newPassword, dto.confirmNewPassword);
     if (!isMatch) throw new NotAcceptableException(PASSWORD_NOT_MATCH);
 
     if (id) {
       const password = await AppUtilities.hashPassword(dto.confirmNewPassword);
-      console.log("Hashed Password:", password);
-      const updatedUser = await this.prisma.user.update({
-        where: {
-          id,
-        },
-        data: {
-          password: password,
-          verifiedToken:null
-        },
-      });
-      console.log(updatedUser);
-     
-    console.log("Updated User:", updatedUser);
+      const updatedUser = await this.usersService.updatePassword(id, password);
 
-    if (!updatedUser) {
-        throw new InternalServerErrorException("Password update failed");
-    }
+      if (!updatedUser) {
+        throw new InternalServerErrorException('Password update failed');
+      }
 
-    this.eventsManager.onPasswordChange(updatedUser, QueuePriority.level1());
+      this.eventsManager.onPasswordChange(updatedUser, QueuePriority.level1());
 
-    return { message: PASSWORD_CHANGED };
+      return { message: PASSWORD_CHANGED };
     }
   }
 
+  private async storeRefreshToken(refreshToken: string, id: string) {
+    await this.prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      },
+    });
+  }
 
   // async socialLogin(user: any) {
   //   const existingUser = await this.prisma.user.findUnique({
   //     where: { email: user.email },
   //   });
-  
+
   //   if (!existingUser) {
   //     // Register the user if they don't exist
   //     const newUser = await this.prisma.user.create({
@@ -253,18 +244,18 @@ export class AuthService {
   //         providerId: user.providerId,
   //       },
   //     });
-  
+
   //     return this.generateTokens(newUser.id);
-     
+
   //   }
-  
+
   //   // User exists, generate tokens
   //   return this.generateTokens(existingUser.id);
   // }
   // private async generateTokens(userId: string) {
   //   const accessToken = TokenUtil.signAccessToken(this.jwtService, userId);
   //   const refreshToken = TokenUtil.signRefreshToken(this.jwtService, userId);
-  
+
   //   await this.prisma.refreshToken.create({
   //     data: {
   //       token: refreshToken,
@@ -272,7 +263,7 @@ export class AuthService {
   //       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
   //     },
   //   });
-  
+
   //   return { accessToken, refreshToken };
   // }
 

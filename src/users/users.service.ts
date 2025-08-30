@@ -71,4 +71,15 @@ export class UsersService extends CrudService<
   async findById(id: string) {
     return this.getBy({ field: 'id', value: id });
   }
+  async updatePassword(id:string,password:string){
+    return await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password: password,
+        verifiedToken:null
+      },
+    });
+  }
 }
