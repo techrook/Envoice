@@ -26,7 +26,7 @@ export class InvoiceController {
   @Get(':invoiceId')
 async getInvoice(@Param('invoiceId') invoiceId: string, @Req() req) {
   const userId = req.user.id; 
-  return this.invoiceService.getInvoiceById(userId, invoiceId);
+  return this.invoiceService.findInvoiceByIdAndUserId(userId, invoiceId);
 }
 
   @Patch('update/:id')

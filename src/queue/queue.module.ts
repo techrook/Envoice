@@ -10,8 +10,9 @@ import { UsersService } from 'src/users/users.service';
 import { BusinessProfileService } from 'src/business-profile/business-profile.service';
 import { InvoiceConsumer } from './consumers/invoice.consumer';
 import { InvoiceService } from 'src/invoice/invoice.service';
+import { ClientService } from 'src/client/client.service';
 @Module({
-  providers: [SignUpConsumer, SignUpEventListener, PrismaClient, EmailService,PrismaService,BusinessProfileConsumer,FileUploadService,UsersService,BusinessProfileService,InvoiceConsumer,InvoiceService,BusinessEventListener], 
+  providers: [SignUpConsumer, SignUpEventListener, PrismaClient, EmailService,PrismaService,BusinessProfileConsumer,FileUploadService,UsersService,BusinessProfileService,InvoiceConsumer,InvoiceService,BusinessEventListener, ClientService], 
 
   imports: [],
 })

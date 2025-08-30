@@ -20,7 +20,7 @@ export class ClientService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createClient(userId: string, createClientDto: CreateClientDto) {
-    // Ensure the user has a business profile
+  
     const businessProfile = await this.prisma.businessProfile.findUnique({
       where: { userId },
     });
@@ -90,5 +90,11 @@ export class ClientService {
     });
 
     return { message: 'Client successfully deleted' };
+  }
+
+  async findAClientById(id:string){
+    return await this.prisma.client.findUnique({
+      where: { id },
+    });
   }
 }

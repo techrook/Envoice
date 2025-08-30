@@ -11,9 +11,13 @@ import PDFDocument = require('pdfkit');
 import { Buffer } from 'buffer';
 import axios from 'axios';
 import { Client, User } from '@prisma/client';
+import { ClientService } from 'src/client/client.service';
+import { BusinessProfileService } from 'src/business-profile/business-profile.service';
 @Injectable()
 export class InvoiceService {
   constructor(
+    private  clientService:ClientService,
+    private  businessService:BusinessProfileService,
     private readonly prisma: PrismaService,
     private readonly eventsManager: EventsManager, // Replace 'any' with the actual type of eventsManager
   ) {}
@@ -21,17 +25,13 @@ export class InvoiceService {
   async createInvoice(userId: string, createInvoiceDto: CreateInvoiceDto) {
     const { clientId, items, discountType, discountValue, taxRate, taxName, ...invoiceData } = createInvoiceDto;
   
-    const businessProfile = await this.prisma.businessProfile.findUnique({
-      where: { userId },
-    });
+    const businessProfile = await this.businessService.findBusinessProfileByUserId(userId)
   
     if (!businessProfile) {
       throw new ForbiddenException(CONSTANT.BUSINESS_PROFILE_REQUIRED);
     }
   
-    const client = await this.prisma.client.findUnique({
-      where: { id: clientId },
-    });
+    const client = await this.clientService.findAClientById(clientId)
   
     if (!client || client.userId !== userId) {
       throw new ForbiddenException(CONSTANT.CLIENT_CREATE_FORBIDDEN);
@@ -110,21 +110,21 @@ export class InvoiceService {
     });
   }
 
-  async getInvoiceById(userId: string, invoiceId: string) {
-    const invoice = await this.prisma.invoice.findFirst({
-      where: {
-        id: invoiceId,
-        userId: userId,
-      },
-      include: { client: true, items: true }, // Include related data
-    });
+  // async getInvoiceById(userId: string, invoiceId: string) {
+  //   const invoice = await this.prisma.invoice.findFirst({
+  //     where: {
+  //       id: invoiceId,
+  //       userId: userId,
+  //     },
+  //     include: { client: true, items: true }, // Include related data
+  //   });
 
-    if (!invoice) {
-      throw new NotFoundException(CONSTANT.INVOICE_NOT_FOUND);
-    }
+  //   if (!invoice) {
+  //     throw new NotFoundException(CONSTANT.INVOICE_NOT_FOUND);
+  //   }
 
-    return invoice;
-  }
+  //   return invoice;
+  // }
 
   async updateInvoice(
     userId: string,
@@ -132,19 +132,9 @@ export class InvoiceService {
     updateInvoiceDto: UpdateInvoiceDto,
   ) {
     // Fetch the invoice to ensure the user owns it
-    const invoice = await this.prisma.invoice.findFirst({
-      where: {
-        id: invoiceId,
-        userId: userId,
-      },
-      include: { client: true, items: true },
-    });
+    const invoice = await this.findInvoiceByIdAndUserId(invoiceId, userId)
 
-    if (!invoice || invoice.userId !== userId) {
-      throw new ForbiddenException(CONSTANT.INVOICE_UPDATE_FORBIDDEN);
-    }
 
-    // Calculate new totalAmount if items are provided
     let totalAmount = invoice.totalAmount;
     if (updateInvoiceDto.items) {
       totalAmount = updateInvoiceDto.items.reduce((sum, item) => {
@@ -365,6 +355,20 @@ export class InvoiceService {
     });
   }
   
-  
+   async  findInvoiceByIdAndUserId(invoiceId:string, userId:string){
+    const invoice = await this.prisma.invoice.findFirst({
+      where: {
+        id: invoiceId,
+        userId: userId,
+      },
+      include: { client: true, items: true },
+    });
+
+    if (!invoice || invoice.userId !== userId) {
+      throw new ForbiddenException(CONSTANT.INVOICE_UPDATE_FORBIDDEN);
+    }
+
+    return invoice;
+  }
 }
   

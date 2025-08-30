@@ -76,4 +76,10 @@ export class BusinessProfileService {
     })
       return BUSINESS_PROFILE_DELETED
   }
+
+  async findBusinessProfileByUserId(userId:string){
+    return  await this.prisma.businessProfile.findUnique({
+      where: { userId },
+    });
+  }
 }
