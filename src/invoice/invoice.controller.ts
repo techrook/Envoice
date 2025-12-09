@@ -3,6 +3,7 @@ import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/create-invoice-dto';
 import { JwtAuthGuard } from '../auth/JwtAuthGuard/jwt-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Request } from 'express';
 
 @ApiTags('Invoices')
 @ApiBearerAuth()
@@ -17,11 +18,11 @@ export class InvoiceController {
     const userId = req.user.id; 
     return this.invoiceService.createInvoice(userId, createInvoiceDto);
   }
-  @Get()
-  @ApiOperation({ summary: 'Get all invoices' })
-  findAll(@Body('userId') userId: string) {
-    return this.invoiceService.getAllInvoices(userId);
-  }
+ @Get()
+async getAll(@Req() req) {
+  const userId = req.user.id;  
+  return this.invoiceService.getAllInvoices(userId);
+}
     
   @Get(':invoiceId')
 async getInvoice(@Param('invoiceId') invoiceId: string, @Req() req) {

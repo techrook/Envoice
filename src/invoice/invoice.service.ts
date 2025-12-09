@@ -96,8 +96,9 @@ export class InvoiceService {
         items: true,
       },
     });
-  
+    
     await this.eventsManager.onInvoiceCreated(userId, clientId, invoice);
+    console.log(invoice)
   
     return invoice;
   }

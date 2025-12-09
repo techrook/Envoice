@@ -19,6 +19,11 @@ export enum DiscountType {
   PERCENTAGE = 'PERCENTAGE',
   FIXED = 'FIXED',
 }
+export enum InvoiceStatus {
+  PAID = 'PAID',
+  PENDING = 'PENDING',
+  OVERDUE = 'OVERDUE',
+}
 
 class InvoiceItemDto {
   @ApiProperty()
@@ -113,6 +118,9 @@ class UpdateInvoiceItemDto {
   @IsOptional()
   @IsBoolean()
   isPercentageDiscount?: boolean;
+
+ 
+
 }
 
 export class UpdateInvoiceDto {
@@ -143,6 +151,12 @@ export class UpdateInvoiceDto {
   @IsOptional()
   @IsString()
   taxName?: string;
+
+  @IsOptional()
+  @IsEnum(InvoiceStatus, {
+    message: 'Status must be one of: PAID, PENDING, OVERDUE'
+  })
+  status?: InvoiceStatus;
 
   @IsOptional()
   @IsArray()
