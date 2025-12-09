@@ -17,10 +17,11 @@ import { JwtStrategy } from './JWT Strategy/jwt.strategy';
     JwtModule.register({
       secret: process.env.JWT_ACCESS_TOKEN_SECRET,
       signOptions: { expiresIn: '1h' },
-    }),
+    }),    
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
+      

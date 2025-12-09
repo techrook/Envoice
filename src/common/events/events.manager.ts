@@ -58,6 +58,7 @@ class EventsManager {
   public onBusinessProfileUpdated(userId: string, file: Express.Multer.File) {
     return this.eventEmitter.emit(onBusinessProfileUpdated,new BusinessProfileUpdatedEvent(userId, file))
   }
+  
 
   public onInvoiceCreated(userId: string, clientId:string, invoice: object) {
     return this.eventEmitter.emit(onInvoiceCreated,new InvoiceCreatedEvent(userId,clientId, invoice))
