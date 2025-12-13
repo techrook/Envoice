@@ -1,6 +1,7 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Queue } from 'bullmq';
+import { on } from 'events';
 import { CONSTANT } from 'src/common/constants';
 const {
   onPasswordChange,
@@ -16,6 +17,7 @@ const {
   onBusinessProfileCreated,
   onBusinessProfileUpdated,
   onInvoiceCreated,
+  onUserProfileUpdated
 } = CONSTANT;
 
 export class EventBroker {
@@ -88,6 +90,15 @@ export class EventBroker {
   async handleBusinessProfileUpdated(event) {
     const { userId, file } = event;
     await this.businessQ.add(onBusinessProfileUpdated, {
+      userId,
+      file,
+    });
+  }
+
+    @OnEvent(onUserProfileUpdated)
+  async handleUserProfileUpdate(event) {
+    const { userId, file } = event;
+    await this.businessQ.add(onUserProfileUpdated, {
       userId,
       file,
     });

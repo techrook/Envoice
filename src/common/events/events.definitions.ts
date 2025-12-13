@@ -53,6 +53,13 @@ export class BusinessProfileUpdatedEvent {
   ) {}
 }
 
+export class UserProfileUpdatedEvent {
+  constructor(
+    public userId: string,
+    public file: Express.Multer.File,
+  ) {}
+}
+
 export class InvoiceCreatedEvent {
   constructor(
     public userId: string,

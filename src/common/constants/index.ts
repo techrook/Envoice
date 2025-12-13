@@ -32,6 +32,7 @@ export const CONSTANT = {
   BUSINESS_PROFILE_DELETED: 'Business profile deleted successfully',
   onBusinessProfileCreated: 'business.profile.created',
   onBusinessProfileUpdated: 'business.profile.updated',
+  onUserProfileUpdated: 'user.profile.updated',
   onInvoiceCreated: 'invoice.created',
   CLIENT_UPDATE_FORBIDDEN: 'You are not allowed to update this client',
   CLIENT_NOT_FOUND: 'Client not found',

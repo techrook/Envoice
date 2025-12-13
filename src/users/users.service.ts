@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { CreateUserDto, UserSignUpDto } from 'src/auth/dto/auth.dto';
 import { CrudService } from 'src/common/database/crud.service';
 import { UsersMapType } from './users.mapType';
 import { PrismaService } from 'src/prisma/prisma.service';
+import EventsManager from 'src/common/events/events.manager';
+import { CONSTANT } from 'src/common/constants';
 
 export interface IGetUserBy<T = keyof Prisma.UserWhereInput, R = string> {
   field: T;
@@ -20,12 +22,16 @@ export interface UpdateUserDetailsDto {
   imageUrl?: string;
 }
 
+const {  } = CONSTANT;
+
 @Injectable()
 export class UsersService extends CrudService<
   Prisma.UserDelegate,
   UsersMapType
 > {
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventsManager: EventsManager,) {
     super(prisma.user);
   }
 
@@ -102,64 +108,47 @@ export class UsersService extends CrudService<
    * @param userId - User ID
    * @param dto - Update data
    */
-  async updateUserDetails(userId: string, dto: UpdateUserDetailsDto) {
-    try {
-      // Check if username is being updated and if it's already taken by another user
-      if (dto.username) {
-        const existingUser = await this.prisma.user.findFirst({
-          where: {
-            username: dto.username,
-            NOT: {
-              id: userId,
-            },
-          },
-        });
+async updateUserDetails(userId: string, dto: UpdateUserDetailsDto, file?: Express.Multer.File) {
+  try {
+    // Remove undefined values
+    const updateData = Object.fromEntries(
+      Object.entries(dto).filter(([_, v]) => v !== undefined)
+    );
 
-        if (existingUser) {
-          throw new Error('Username is already taken');
-        }
-      }
-
-      // Remove undefined values from dto
-      const updateData = Object.entries(dto).reduce((acc, [key, value]) => {
-        if (value !== undefined) {
-          acc[key] = value;
-        }
-        return acc;
-      }, {} as any);
-
-      // Update user
-      const updatedUser = await this.prisma.user.update({
-        where: {
-          id: userId,
-        },
-        data: {
-          ...updateData,
-          updatedAt: new Date(),
-        },
-        select: {
-          id: true,
-          email: true,
-          username: true,
-          first_name: true,
-          last_name: true,
-          mobile: true,
-          gender: true,
-          country: true,
-          imageUrl: true,
-          emailVerified: true,
-          createdAt: true,
-          updatedAt: true,
-          lastLogin: true,
-        },
-      });
-
-      return updatedUser;
-    } catch (error) {
-      console.error('Error updating user details:', error);
-      throw error;
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        first_name: true,
+        last_name: true,
+        mobile: true,
+        gender: true,
+        country: true,
+        imageUrl: true,
+        emailVerified: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLogin: true,
+      },
+    });
+          if (file) {
+      this.eventsManager.onUserProfileUpdated(userId, file);
     }
+    return updatedUser;
+  } catch (error: any) {
+    // Handle unique constraint error
+    if (error.code === "P2002" && error.meta?.target?.includes("username")) {
+      throw new ConflictException("Username is already taken");
+    }
+
+    console.error("Error updating user details:", error);
+    throw error;
   }
+}
+
 
   /**
    * Update user's last login timestamp
