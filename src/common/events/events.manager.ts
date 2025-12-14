@@ -1,11 +1,11 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CONSTANT } from '../constants/index';
-import { UserRegisterEvent,UserLoginEvent, UserConfirmedMailEvent, PassChangeSuccess, PasswordResetEvent,BusinessProfileCreatedEvent, BusinessProfileUpdatedEvent,InvoiceCreatedEvent  } from './events.definitions';
+import { UserRegisterEvent,UserLoginEvent, UserConfirmedMailEvent, PassChangeSuccess, PasswordResetEvent,BusinessProfileCreatedEvent, BusinessProfileUpdatedEvent,InvoiceCreatedEvent, UserProfileUpdatedEvent  } from './events.definitions';
 import { User } from '@prisma/client';
 import { Priority } from './events.interface';
 // import { User } from '@prisma/client';
 
-const { onUserRegister, onUserLogin, onEmailConfirmation, onPasswordReset, onPasswordChange,onBusinessProfileCreated,onBusinessProfileUpdated,onInvoiceCreated } = CONSTANT;
+const { onUserRegister, onUserLogin, onEmailConfirmation, onPasswordReset, onPasswordChange,onBusinessProfileCreated,onBusinessProfileUpdated,onInvoiceCreated, onUserProfileUpdated } = CONSTANT;
 class EventsManager {
   constructor(private readonly eventEmitter: EventEmitter2) {}
   public onUserRegister(user: any) {
@@ -62,6 +62,10 @@ class EventsManager {
 
   public onInvoiceCreated(userId: string, clientId:string, invoice: object) {
     return this.eventEmitter.emit(onInvoiceCreated,new InvoiceCreatedEvent(userId,clientId, invoice))
+  }
+
+    public onUserProfileUpdated(userId: string, file: Express.Multer.File) {
+    return this.eventEmitter.emit(onUserProfileUpdated,new UserProfileUpdatedEvent(userId, file))
   }
 }
 

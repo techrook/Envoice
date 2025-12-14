@@ -28,7 +28,6 @@ async function bootstrap() {
   const appHost = configService.get('host');
 
   const initSwagger = (app: INestApplication, serverUrl: string) => {
-    // Add CSP header for just the /api-docs route
     app.use('/api-docs', (req, res, next) => {
       res.setHeader(
         'Content-Security-Policy',

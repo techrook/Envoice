@@ -8,7 +8,7 @@ import { IBaseWoker } from 'src/common/interfaces/queue.interface';
 import { FileUploadService } from 'src/common/file-upload/file-upload.service';
 import AppLogger from 'src/common/log/logger.config';
 import { UsersService } from 'src/users/users.service';
-const { onBusinessProfileCreated, BusinessQ, onBusinessProfileUpdated } = CONSTANT;
+const { onBusinessProfileCreated, BusinessQ, onBusinessProfileUpdated, onUserProfileUpdated } = CONSTANT;
 
 @Processor(BusinessQ)
 export class BusinessProfileConsumer extends IBaseWoker {
@@ -51,6 +51,7 @@ export class BusinessProfileConsumer extends IBaseWoker {
           buffer: file.buffer,
           originalname: file.originalname
         };
+        console.log('File to upload in consumer:', fileToUpload);
         let imageURLandName;
         try {
           imageURLandName = await this.fileUploadService.uploadFile(fileToUpload);
@@ -60,6 +61,34 @@ export class BusinessProfileConsumer extends IBaseWoker {
         await this.businessProfileService.updateBusinessProfile(userId, { logo: imageURLandName.url });
         break;
       }
+
+      case onUserProfileUpdated: {
+  const { userId, file } = job.data;
+  const fileToUpload = {
+    buffer: file.buffer,
+    originalname: file.originalname
+  };
+
+  let imageURLandName;
+  try {
+    // 👇 Specify it's a PROFILE image
+    imageURLandName = await this.fileUploadService.uploadFile(fileToUpload, {
+      folder: 'profile-images',
+      prefix: 'profile'
+    });
+  } catch (uploadError) {
+    this.log.error('Profile image upload failed:', uploadError);
+    throw uploadError; // or handle gracefully
+  }
+
+  // Only update imageUrl, nothing else
+  await this.prisma.user.update({
+    where: { id: userId },
+    data: { imageUrl: imageURLandName.url }
+  });
+
+  break;
+}
 
       default: {
         this.log.warn(`Unknown job name: ${job.name}`);
