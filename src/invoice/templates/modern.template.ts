@@ -1,0 +1,382 @@
+// src/invoices/templates/modern.template.ts
+import PDFDocument = require('pdfkit');
+import axios from 'axios';
+import { User, Client } from '@prisma/client';
+
+export class ModernTemplate {
+  constructor(private prisma: any) {}
+
+  async generate(invoice: any, user: User, client: Client): Promise<Buffer> {
+    const doc = new PDFDocument({ margin: 50 });
+    const buffers: Uint8Array[] = [];
+
+    doc.on('data', (chunk) => buffers.push(chunk));
+
+    return new Promise(async (resolve, reject) => {
+      doc.on('end', () => {
+        const finalBuffer = Buffer.concat(buffers);
+        resolve(finalBuffer);
+      });
+
+      doc.on('error', reject);
+
+      // ✅ CHECK FOR BUSINESS COPY FLAG
+      const isBusinessCopy = invoice.isBusinessCopy === true;
+
+      // ✅ DETERMINE INVOICE STATUS
+      const getInvoiceStatus = () => {
+        if (invoice.status) {
+          const status = invoice.status.toUpperCase();
+          if (status === 'PAID') return { text: 'PAID', color: '#16a34a' }; // Green
+          if (status === 'PENDING') {
+            const dueDate = new Date(invoice.dueDate);
+            const now = new Date();
+            if (dueDate < now) return { text: 'OVERDUE', color: '#dc2626' }; // Red
+            return { text: 'PENDING', color: '#f59e0b' }; // Amber
+          }
+        }
+        
+        const dueDate = new Date(invoice.dueDate);
+        const now = new Date();
+        if (dueDate < now) return { text: 'OVERDUE', color: '#dc2626' };
+        return { text: 'PENDING', color: '#f59e0b' };
+      };
+
+      const invoiceStatus = getInvoiceStatus();
+
+      // ✅ DATE FORMATTER
+      const formatDate = (dateString: string) => {
+        try {
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+        } catch (e) {
+          return dateString;
+        }
+      };
+
+      // Fetch Business Profile
+      let businessProfile: any = {};
+      try {
+        if (user) {
+          businessProfile = await this.prisma.businessProfile.findFirst({
+            where: { userId: user.id },
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to load business profile:', err.message);
+      }
+
+      // ===========================
+      // MODERN TEMPLATE DESIGN
+      // ===========================
+
+      // Header Background
+      doc
+        .rect(0, 0, 612, 150)
+        .fill('#6366f1');
+
+      // ✅ TOP-RIGHT BADGES (in header)
+      const badgeX = 460;
+      let badgeY = 20;
+
+      // Status Badge
+      doc
+        .roundedRect(badgeX, badgeY, 110, 28, 5)
+        .fill(invoiceStatus.color);
+
+      doc
+        .fillColor('#ffffff')
+        .fontSize(11)
+        .font('Helvetica-Bold')
+        .text(invoiceStatus.text, badgeX, badgeY + 8, {
+          width: 110,
+          align: 'center',
+        });
+
+      // Business/Client Copy Badge
+      badgeY += 35;
+      if (isBusinessCopy) {
+        doc
+          .roundedRect(badgeX, badgeY, 110, 24, 5)
+          .fill('#dc2626');
+
+        doc
+          .fillColor('#ffffff')
+          .fontSize(9)
+          .font('Helvetica-Bold')
+          .text('BUSINESS COPY', badgeX, badgeY + 7, {
+            width: 110,
+            align: 'center',
+          });
+
+        // Diagonal watermark
+        doc.save();
+        doc
+          .fontSize(50)
+          .fillColor('#6366f1', 0.06)
+          .rotate(-45, { origin: [300, 400] })
+          .text('BUSINESS COPY', 100, 350, {
+            width: 500,
+            align: 'center',
+          })
+          .rotate(45);
+        doc.restore();
+      } else {
+        doc
+          .roundedRect(badgeX, badgeY, 110, 24, 5)
+          .fill('#ffffff');
+
+        doc
+          .fillColor('#6366f1')
+          .fontSize(9)
+          .font('Helvetica-Bold')
+          .text('CLIENT COPY', badgeX, badgeY + 7, {
+            width: 110,
+            align: 'center',
+          });
+      }
+
+      // Logo
+      try {
+        if (businessProfile?.logo) {
+          const response = await axios.get(businessProfile.logo, {
+            responseType: 'arraybuffer',
+            headers: {
+              'User-Agent': 'Mozilla/5.0',
+            },
+          });
+          const imageBuffer = Buffer.from(response.data as ArrayBuffer);
+          doc.image(imageBuffer, 50, 30, { width: 80, height: 80 });
+        }
+      } catch (err) {
+        console.warn('Failed to load logo:', err.message);
+      }
+
+      // Business Name
+      doc
+        .fillColor('#ffffff')
+        .fontSize(24)
+        .font('Helvetica-Bold')
+        .text(businessProfile?.name || 'Your Business', 160, 40, { align: 'left' });
+
+      // Business Details
+      doc
+        .fontSize(10)
+        .font('Helvetica')
+        .fillColor('#e0e7ff')
+        .text(businessProfile?.location || '', 160, 70)
+        .text(businessProfile?.contact || '', 160, 85);
+
+      // INVOICE Title
+     
+
+      // Reset to black text for body
+      doc.fillColor('#000000');
+
+      // Invoice Details Section
+      const detailsY = 180;
+      doc
+        .rect(350, detailsY, 200, 100)
+        .fill('#f0f4ff');
+
+      doc
+        .fillColor('#4338ca')
+        .fontSize(10)
+        .font('Helvetica-Bold')
+        .text('Invoice Number:', 360, detailsY + 10)
+        .fillColor('#1e1b4b')
+        .fontSize(9)
+        .font('Helvetica')
+        .text(`#${invoice.invoiceNumber}`, 360, detailsY + 25, { width: 180 });
+
+      doc
+        .fillColor('#4338ca')
+        .fontSize(10)
+        .font('Helvetica-Bold')
+        .text('Issue Date:', 360, detailsY + 45)
+        .fillColor('#1e1b4b')
+        .fontSize(9)
+        .font('Helvetica')
+        .text(formatDate(invoice.issueDate), 360, detailsY + 60, { width: 180 });
+
+      doc
+        .fillColor('#4338ca')
+        .fontSize(10)
+        .font('Helvetica-Bold')
+        .text('Due Date:', 360, detailsY + 75)
+        .fillColor('#1e1b4b')
+        .fontSize(9)
+        .font('Helvetica')
+        .text(formatDate(invoice.dueDate), 360, detailsY + 90, { width: 180 });
+
+      // Client Info
+      doc
+        .rect(50, detailsY, 250, 100)
+        .fill('#f8fafc');
+
+      doc
+        .fillColor('#4338ca')
+        .fontSize(12)
+        .font('Helvetica-Bold')
+        .text('BILL TO:', 60, detailsY + 10);
+
+      doc
+        .fillColor('#1e1b4b')
+        .fontSize(11)
+        .font('Helvetica-Bold')
+        .text(client.name, 60, detailsY + 30)
+        .font('Helvetica')
+        .fontSize(9)
+        .fillColor('#64748b')
+        .text(client.email || '', 60, detailsY + 45)
+        .text(client.phone || '', 60, detailsY + 60)
+        .text(client.address || '', 60, detailsY + 75, { width: 230 });
+
+      // Table Section
+      const tableTop = 310;
+      
+      doc
+        .rect(50, tableTop, 500, 25)
+        .fill('#6366f1');
+
+      doc
+        .fillColor('#ffffff')
+        .fontSize(10)
+        .font('Helvetica-Bold')
+        .text('DESCRIPTION', 60, tableTop + 8)
+        .text('QTY', 300, tableTop + 8)
+        .text('PRICE', 360, tableTop + 8)
+        .text('DISCOUNT', 420, tableTop + 8)
+        .text('AMOUNT', 490, tableTop + 8);
+
+      doc.fillColor('#000000').font('Helvetica');
+      let y = tableTop + 35;
+      let subTotal = 0;
+      let rowIndex = 0;
+
+      invoice.items?.forEach((item: any) => {
+        const amount = item.amount ?? 0;
+        subTotal += amount;
+
+        if (rowIndex % 2 === 0) {
+          doc.rect(50, y - 5, 500, 20).fill('#f8fafc');
+        }
+
+        doc
+          .fillColor('#1e293b')
+          .fontSize(9)
+          .text(item.description || '', 60, y, { width: 220 })
+          .text((item.quantity ?? 0).toString(), 300, y)
+          .text(`$${(item.unitPrice ?? 0).toFixed(2)}`, 360, y)
+          .text(`$${(item.discount ?? 0).toFixed(2)}`, 420, y)
+          .text(`$${amount.toFixed(2)}`, 490, y);
+
+        y += 20;
+        rowIndex++;
+      });
+
+      // Summary Section
+      y += 20;
+      const summaryX = 340;
+
+      doc
+        .fontSize(10)
+        .fillColor('#64748b')
+        .text('Subtotal:', summaryX, y, { width: 100, align: 'right' })
+        .fillColor('#1e293b')
+        .text(`$${subTotal.toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+
+      if (invoice.invoiceDiscount && invoice.invoiceDiscount > 0) {
+        y += 20;
+        const discountLabel =
+          invoice.discountType === 'PERCENTAGE'
+            ? `${invoice.discountValue ?? 0}%`
+            : `$${(invoice.discountValue ?? 0).toFixed(2)}`;
+
+        doc
+          .fillColor('#64748b')
+          .text(`Discount (${discountLabel}):`, summaryX, y, { width: 100, align: 'right' })
+          .fillColor('#dc2626')
+          .text(`-$${(invoice.invoiceDiscount ?? 0).toFixed(2)}`, summaryX + 110, y, {
+            width: 90,
+            align: 'right',
+          });
+      }
+
+      if (invoice.taxAmount && invoice.taxAmount > 0) {
+        y += 20;
+        doc
+          .fillColor('#64748b')
+          .text(
+            `${invoice.taxName || 'Tax'} (${invoice.taxRate ?? 0}%):`,
+            summaryX,
+            y,
+            { width: 100, align: 'right' }
+          )
+          .fillColor('#1e293b')
+          .text(`$${(invoice.taxAmount ?? 0).toFixed(2)}`, summaryX + 110, y, {
+            width: 90,
+            align: 'right',
+          });
+      }
+
+      // ✅ FIXED TOTAL BOX
+      y += 30;
+      doc
+        .rect(summaryX, y - 10, 210, 35)
+        .fill('#6366f1');
+
+      doc
+        .fillColor('#ffffff')
+        .fontSize(14)
+        .font('Helvetica-Bold')
+        .text('TOTAL:', summaryX + 10, y + 5, { width: 80, align: 'left' })
+        .fontSize(16)
+        .text(`$${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 100, y + 5, {
+          width: 100,
+          align: 'right',
+        });
+
+      // Notes Section
+      y += 60;
+      if (invoice.notes) {
+        doc
+          .fillColor('#64748b')
+          .fontSize(9)
+          .font('Helvetica')
+          .text(invoice.notes, 50, y, { width: 500 });
+      }
+
+      // Footer
+      if (isBusinessCopy) {
+        doc
+          .fontSize(8)
+          .fillColor('#dc2626')
+          .font('Helvetica-Bold')
+          .text(
+            'BUSINESS COPY - This is a copy for your records. Not valid for payment.',
+            50,
+            745,
+            { align: 'center', width: 500 }
+          );
+      } else {
+        doc
+          .fontSize(8)
+          .fillColor('#94a3b8')
+          .font('Helvetica')
+          .text(
+            'This is a computer-generated invoice.',
+            50,
+            750,
+            { align: 'center', width: 500 }
+          );
+      }
+
+      doc.end();
+    });
+  }
+}
