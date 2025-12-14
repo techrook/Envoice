@@ -45,7 +45,7 @@ export class UsersService extends CrudService<
       data: {
         ...dto,
       },
-      select: {
+      select: {    
         id: true,
         email: true,
         username: true,

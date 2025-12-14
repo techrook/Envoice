@@ -79,6 +79,7 @@ model Invoice {
   status        InvoiceStatus  @default(PENDING)
   notes         String?
   
+  template       String   @default("MODERN")
   taxName       String?        // e.g., "VAT", "GST"
   taxRate       Float?         // e.g., 7.5 for 7.5%
 
