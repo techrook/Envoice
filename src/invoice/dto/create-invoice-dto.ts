@@ -28,8 +28,8 @@ export enum InvoiceStatus {
 
 export enum InvoiceTemplate {
   MODERN = 'MODERN',
-  CLASSIC = 'CLASSIC',
-  CREATIVE = 'CREATIVE',
+   BLUE_MODERN = 'BLUE_MODERN',
+  RED_ELEGANT = 'RED_ELEGANT',
 }
 
 

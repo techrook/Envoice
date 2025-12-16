@@ -39,10 +39,10 @@ export class InvoiceController {
     @Res() res: Response, // ✅ Now @Res is imported
   ) {
     try {
-      const validTemplates = ['MODERN', 'CLASSIC', 'CREATIVE'];
+      const validTemplates = ['MODERN', 'BLUE_MODERN', 'RED_ELEGANT'];
       if (!validTemplates.includes(template)) {
         return res.status(400).json({
-          message: 'Invalid template. Choose MODERN, CLASSIC, or CREATIVE',
+          message: 'Invalid template. Choose MODERN, BLUE_MODERN, or RED_ELEGANT',
         });
       }
 

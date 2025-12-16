@@ -14,8 +14,8 @@ import { Client, User } from '@prisma/client';
 import { ClientService } from 'src/client/client.service';
 import { BusinessProfileService } from 'src/business-profile/business-profile.service';
 import { ModernTemplate } from './templates/modern.template';
-import { ClassicTemplate } from './templates/classic.template';
-import { CreativeTemplate } from './templates/creative.template';
+import { BlueModernTemplate } from './templates/blue-modern.template';
+import { RedElegantTemplate } from './templates/red-elegant.template';
 
 
 
@@ -23,8 +23,8 @@ import { CreativeTemplate } from './templates/creative.template';
 export class InvoiceService {
 
   private modernTemplate: ModernTemplate;
-  private classicTemplate: ClassicTemplate;
-  private creativeTemplate: CreativeTemplate;
+  private blueModernTemplate: BlueModernTemplate;
+  private redElegantTemplate: RedElegantTemplate;
   constructor(
     private  clientService:ClientService,
     private  businessService:BusinessProfileService,
@@ -32,8 +32,8 @@ export class InvoiceService {
     private readonly eventsManager: EventsManager, // Replace 'any' with the actual type of eventsManager
   ) {
      this.modernTemplate = new ModernTemplate(prisma);
-    this.classicTemplate = new ClassicTemplate(prisma);
-    this.creativeTemplate = new CreativeTemplate(prisma);
+    this.blueModernTemplate = new BlueModernTemplate(prisma);
+    this.redElegantTemplate = new RedElegantTemplate(prisma);
   }
 
   async createInvoice(userId: string, createInvoiceDto: CreateInvoiceDto) {
@@ -221,11 +221,11 @@ export class InvoiceService {
 
     // Select the appropriate template and generate PDF
     switch (template) {
-      case 'CLASSIC':
-        return await this.classicTemplate.generate(invoice, user, client);
+      case 'BLUE_MODERN':
+        return await this.blueModernTemplate.generate(invoice, user, client);
 
-      case 'CREATIVE':
-        return await this.creativeTemplate.generate(invoice, user, client);
+      case 'RED_ELEGANT':
+        return await this.redElegantTemplate.generate(invoice, user, client);
 
       case 'MODERN':
       default:
@@ -250,31 +250,31 @@ async getTemplates() {
           ],
         },
         {
-          id: 'CLASSIC',
-          name: 'Classic',
-          description: 'Traditional amber & gold bordered design',
-          colorScheme: 'amber-gold',
-          bestFor: 'Law firms, Corporate, Professional services',
-          features: [
-            'Double borders',
-            'Centered layout',
-            'Signature line',
-            'Elegant typography',
-          ],
-        },
-        {
-          id: 'CREATIVE',
-          name: 'Creative',
-          description: 'Modern pink & rose playful design',
-          colorScheme: 'pink-rose',
-          bestFor: 'Creative agencies, Designers, Freelancers',
-          features: [
-            'Rounded corners',
-            'Decorative circles',
-            'Vibrant colors',
-            'Playful elements',
-          ],
-        },
+  id: 'BLUE_MODERN',
+  name: 'Blue Modern',
+  description: 'Clean cyan & blue corporate design',
+  colorScheme: 'cyan-blue',
+  bestFor: 'Tech companies, Startups, Corporate',
+  features: [
+    'Cyan table header',
+    'Blue header section',
+    'Clean layout',
+    'Professional styling',
+  ],
+},
+{
+  id: 'RED_ELEGANT',
+  name: 'Red Elegant',
+  description: 'Sophisticated maroon & white design',
+  colorScheme: 'red-maroon',
+  bestFor: 'Law firms, Finance, Professional services',
+  features: [
+    'Two-column layout',
+    'Red accents',
+    'Signature line',
+    'Elegant typography',
+  ],
+},
       ],
       default: 'MODERN',
     };
@@ -292,15 +292,15 @@ async getTemplates() {
 
     // Select template and generate PDF
     switch (template) {
-      case 'CLASSIC':
-        return await this.classicTemplate.generate(
+      case 'BLUE_MODERN':
+        return await this.blueModernTemplate.generate(
           sampleInvoice,
           sampleUser as any,
           sampleClient,
         );
 
-      case 'CREATIVE':
-        return await this.creativeTemplate.generate(
+      case 'RED_ELEGANT':
+        return await this.redElegantTemplate.generate(
           sampleInvoice,
           sampleUser as any,
           sampleClient,
@@ -320,8 +320,8 @@ async getTemplates() {
   private generateSampleInvoiceData(template: string) {
     const templateNames = {
       MODERN: 'Modern',
-      CLASSIC: 'Classic',
-      CREATIVE: 'Creative',
+      BLUE_MODERN: 'Blue_modern',
+      RED_ELEGANT: 'Red_elegant',
     };
 
     return {
@@ -423,10 +423,10 @@ async generateBusinessCopyPdf(invoice: any, user: any, client: any): Promise<Buf
   };
 
   switch (template) {
-    case 'CLASSIC':
-      return await this.classicTemplate.generate(invoiceWithFlag, user, client);
-    case 'CREATIVE':
-      return await this.creativeTemplate.generate(invoiceWithFlag, user, client);
+    case 'BLUE_MODERN':
+      return await this.blueModernTemplate.generate(invoiceWithFlag, user, client);
+    case 'RED_ELEGANT':
+      return await this.redElegantTemplate.generate(invoiceWithFlag, user, client);
     case 'MODERN':
     default:
       return await this.modernTemplate.generate(invoiceWithFlag, user, client);
