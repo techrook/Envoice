@@ -25,6 +25,14 @@ export enum InvoiceStatus {
   OVERDUE = 'OVERDUE',
 }
 
+
+export enum InvoiceTemplate {
+  MODERN = 'MODERN',
+   BLUE_MODERN = 'BLUE_MODERN',
+  RED_ELEGANT = 'RED_ELEGANT',
+}
+
+
 class InvoiceItemDto {
   @ApiProperty()
   @IsString()
@@ -70,6 +78,11 @@ export class CreateInvoiceDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  // ✅ NEW: Template field
+  @IsEnum(InvoiceTemplate)
+  @IsOptional()
+  template?: InvoiceTemplate;
 
   @ApiProperty({ type: [InvoiceItemDto] })
   @IsArray()

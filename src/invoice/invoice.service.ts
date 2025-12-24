@@ -13,17 +13,31 @@ import axios from 'axios';
 import { Client, User } from '@prisma/client';
 import { ClientService } from 'src/client/client.service';
 import { BusinessProfileService } from 'src/business-profile/business-profile.service';
+import { ModernTemplate } from './templates/modern.template';
+import { BlueModernTemplate } from './templates/blue-modern.template';
+import { RedElegantTemplate } from './templates/red-elegant.template';
+
+
+
 @Injectable()
 export class InvoiceService {
+
+  private modernTemplate: ModernTemplate;
+  private blueModernTemplate: BlueModernTemplate;
+  private redElegantTemplate: RedElegantTemplate;
   constructor(
     private  clientService:ClientService,
     private  businessService:BusinessProfileService,
     private readonly prisma: PrismaService,
     private readonly eventsManager: EventsManager, // Replace 'any' with the actual type of eventsManager
-  ) {}
+  ) {
+     this.modernTemplate = new ModernTemplate(prisma);
+    this.blueModernTemplate = new BlueModernTemplate(prisma);
+    this.redElegantTemplate = new RedElegantTemplate(prisma);
+  }
 
   async createInvoice(userId: string, createInvoiceDto: CreateInvoiceDto) {
-    const { clientId, items, discountType, discountValue, taxRate, taxName, ...invoiceData } = createInvoiceDto;
+    const { clientId, items, discountType, discountValue, taxRate, template, taxName, ...invoiceData } = createInvoiceDto;
   
     const businessProfile = await this.businessService.findBusinessProfileByUserId(userId)
   
@@ -74,6 +88,7 @@ export class InvoiceService {
         issueDate: new Date(invoiceData.issueDate),
         dueDate: new Date(invoiceData.dueDate),
         invoiceNumber,
+        template: template || 'MODERN',
         totalAmount,
         taxRate,
         taxName,
@@ -189,173 +204,237 @@ export class InvoiceService {
     await this.prisma.invoiceItem.deleteMany({
       where: { invoiceId: invoiceId },
     });
-
+         
     // Delete the Invoice
     await this.prisma.invoice.delete({
-      where: {
+      where: {      
         id: invoiceId,
       },
     });
 
     return { message: CONSTANT.INVOICE_DELETE_SUCCESS };
   }
+   // ✅ NEW: Generate PDF with template selection
   async generate(invoice: any, user: User, client: Client): Promise<Buffer> {
-    const doc = new PDFDocument({ margin: 50 });
-    const buffers: Uint8Array[] = [];
-  
-    doc.on('data', (chunk) => buffers.push(chunk));
-  
-    return new Promise(async (resolve, reject) => {
-      doc.on('end', () => {
-        const finalBuffer = Buffer.concat(buffers);
-        resolve(finalBuffer);
-      });
-  
-      doc.on('error', reject);
-  
-      // Optional Logo (Cloudinary or URL)
-      let businessProfile: any = {};
-      try {
-        if (user) {
-          businessProfile = await this.prisma.businessProfile.findFirst({
-            where: { userId: user.id },
-          });
-  
-          if (businessProfile?.logo) {
-            const response = await axios.get(businessProfile.logo, {
-              responseType: 'arraybuffer',
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              },
-            });
-            const imageBuffer = Buffer.from(response.data as ArrayBuffer);
-            doc.image(imageBuffer, 50, 45, { width: 100 });
-          }
-        }
-      } catch (err) {
-        console.warn('Failed to load logo:', err.message);
-      }
-  
-      // Business Info
-      doc
-        .fontSize(20)
-        .text(businessProfile?.name || 'Your Business Name', 200, 50, { align: 'right' })
-        .fontSize(10)
-        .text(businessProfile?.location || '', { align: 'right' })
-        .text(businessProfile?.contact || '', { align: 'right' })
-        .text(`User ID: ${businessProfile?.userId || 'N/A'}`, { align: 'right' })
-        .moveDown();
-  
-      // Invoice Info
-      doc
-        .fontSize(16)
-        .text(`Invoice #${invoice.invoiceNumber}`, { align: 'left' })
-        .text(`Issue Date: ${invoice.issueDate}`, { align: 'left' })
-        .text(`Due Date: ${invoice.dueDate}`, { align: 'left' })
-        .moveDown();
-  
-      // Client Info
-      doc
-        .fontSize(12)
-        .text('Bill To:', 50, doc.y)
-        .font('Helvetica-Bold')
-        .text(client.name)
-        .font('Helvetica')
-        .text(client.email || '')
-        .text(client.phone || '')
-        .text(client.address || '')
-        .moveDown();
-  
-      // Table Headers
-      const tableTop = doc.y;
-      const itemSpacing = 20;
-      doc.font('Helvetica-Bold');
-      doc
-        .text('Description', 50, tableTop)
-        .text('Qty', 260, tableTop)
-        .text('Unit Price', 310, tableTop)
-        .text('Discount', 390, tableTop)
-        .text('Amount', 470, tableTop);
-  
-      doc
-        .moveTo(50, tableTop + 15)
-        .lineTo(550, tableTop + 15)
-        .stroke();
-  
-      // Table Rows and Subtotal Calculation
-      doc.font('Helvetica');
-      let y = tableTop + 25;
-      let subTotal = 0;
-      invoice.items?.forEach((item: any) => {
-        const description = item.description || '';
-        const quantity = item.quantity ?? 0;
-        const unitPrice = item.unitPrice ?? 0;
-        const discount = item.discount ?? 0;
-        const amount = item.amount ?? 0;
-  
-        // Subtotal is accumulated here, sum all item amounts
-        subTotal += amount;
-  
-        doc
-          .text(description, 50, y)
-          .text(quantity.toString(), 260, y)
-          .text(`$${unitPrice.toFixed(2)}`, 310, y)
-          .text(`$${discount.toFixed(2)}`, 390, y)
-          .text(`$${amount.toFixed(2)}`, 470, y);
-        y += itemSpacing;
-      });
-  
-      // Summary Section
-      y += 10;
-      doc.moveTo(350, y).lineTo(550, y).stroke();
-      doc.font('Helvetica');
-  
-      // Display Subtotal
-      doc.text(`Subtotal: $${(subTotal ?? 0).toFixed(2)}`, 400, y + 10, { align: 'right' });
-  
-      // Discount Logic (if applicable)
-      if (invoice.invoiceDiscount && invoice.invoiceDiscount > 0) {
-        const discountLabel =
-          invoice.discountType === 'PERCENTAGE'
-            ? `${invoice.discountValue ?? 0}%`
-            : `$${(invoice.discountValue ?? 0).toFixed(2)}`;
-  
-        doc.text(
-          `Discount (${discountLabel}): -$${(invoice.invoiceDiscount ?? 0).toFixed(2)}`,
-          400,
-          doc.y + 5,
-          { align: 'right' }
-        );
-      }
-  
-      // Tax Logic (if applicable)
-      if (invoice.taxAmount && invoice.taxAmount > 0) {
-        doc.text(
-          `${invoice.taxName || 'Tax'} (${invoice.taxRate ?? 0}%): $${(invoice.taxAmount ?? 0).toFixed(2)}`,
-          400,
-          doc.y + 5,
-          { align: 'right' }
-        );
-      }
-  
-      // Total Amount (final total)
-      doc
-        .font('Helvetica-Bold')
-        .text(`Total: $${(invoice.totalAmount ?? 0).toFixed(2)}`, 400, doc.y + 10, {
-          align: 'right',
-        });
-  
-      // Notes Section
-      doc
-        .moveDown()
-        .fontSize(10)
-        .fillColor('#888888')
-        .text(`Notes: ${invoice.notes || 'Thank you for your business!'}`, 50, y + 60);
-  
-      doc.end();
-    });
+    // Get the template from invoice (default to MODERN if not set)
+    const template = invoice.template || 'MODERN';
+
+    // Select the appropriate template and generate PDF
+    switch (template) {
+      case 'BLUE_MODERN':
+        return await this.blueModernTemplate.generate(invoice, user, client);
+
+      case 'RED_ELEGANT':
+        return await this.redElegantTemplate.generate(invoice, user, client);
+
+      case 'MODERN':
+      default:
+        return await this.modernTemplate.generate(invoice, user, client);
+    }
   }
+
+async getTemplates() {
+    return {
+      templates: [
+        {
+          id: 'MODERN',
+          name: 'Modern',
+          description: 'Professional indigo & purple gradient design',
+          colorScheme: 'indigo-purple',
+          bestFor: 'Tech companies, SaaS, Startups',
+          features: [
+            'Gradient header',
+            'Modern card layouts',
+            'Clean typography',
+            'Purple accents',
+          ],
+        },
+        {
+  id: 'BLUE_MODERN',
+  name: 'Blue Modern',
+  description: 'Clean cyan & blue corporate design',
+  colorScheme: 'cyan-blue',
+  bestFor: 'Tech companies, Startups, Corporate',
+  features: [
+    'Cyan table header',
+    'Blue header section',
+    'Clean layout',
+    'Professional styling',
+  ],
+},
+{
+  id: 'RED_ELEGANT',
+  name: 'Red Elegant',
+  description: 'Sophisticated maroon & white design',
+  colorScheme: 'red-maroon',
+  bestFor: 'Law firms, Finance, Professional services',
+  features: [
+    'Two-column layout',
+    'Red accents',
+    'Signature line',
+    'Elegant typography',
+  ],
+},
+      ],
+      default: 'MODERN',
+    };
+  }
+
+  // ✅ NEW: Generate template preview
+  async generateTemplatePreview(
+    template: string,
+    userId: string,
+  ): Promise<Buffer> {
+    // Generate sample data
+    const sampleInvoice = this.generateSampleInvoiceData(template);
+    const sampleUser = await this.getSampleUserData(userId);
+    const sampleClient = this.getSampleClientData();
+
+    // Select template and generate PDF
+    switch (template) {
+      case 'BLUE_MODERN':
+        return await this.blueModernTemplate.generate(
+          sampleInvoice,
+          sampleUser as any,
+          sampleClient,
+        );
+
+      case 'RED_ELEGANT':
+        return await this.redElegantTemplate.generate(
+          sampleInvoice,
+          sampleUser as any,
+          sampleClient,
+        );
+
+      case 'MODERN':
+      default:
+        return await this.modernTemplate.generate(
+          sampleInvoice,
+          sampleUser as any,
+          sampleClient,
+        );
+    }
+  }
+
+  // ✅ HELPER: Generate sample invoice data
+  private generateSampleInvoiceData(template: string) {
+    const templateNames = {
+      MODERN: 'Modern',
+      BLUE_MODERN: 'Blue_modern',
+      RED_ELEGANT: 'Red_elegant',
+    };
+
+    return {
+      id: 'preview-' + template.toLowerCase(),
+      invoiceNumber: `SAMPLE-${template}-001`,
+      issueDate: new Date().toISOString().split('T')[0],
+      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0],
+      template: template,
+      taxName: 'VAT',
+      taxRate: 10,
+      taxAmount: 150,
+      invoiceDiscount: 50,
+      discountType: 'PERCENTAGE',
+      discountValue: 5,
+      totalAmount: 1600,
+      notes: `This is a preview of the ${templateNames[template]} template. Your actual invoice will use your business information and client details.`,
+      items: [
+        {
+          id: '1',
+          description: 'Website Design & Development',
+          quantity: 1,
+          unitPrice: 1200,
+          discount: 0,
+          amount: 1200,
+        },
+        {
+          id: '2',
+          description: 'Logo Design',
+          quantity: 2,
+          unitPrice: 150,
+          discount: 0,
+          amount: 300,
+        },
+        {
+          id: '3',
+          description: 'Content Writing (10 pages)',
+          quantity: 10,
+          unitPrice: 20,
+          discount: 0,
+          amount: 200,
+        },
+      ],
+    };
+  }
+
+
+  // ✅ ADD THIS METHOD
+private async getSampleUserData(userId: string) {
+  // Try to get real business profile
+  const businessProfile = await this.prisma.businessProfile.findFirst({
+    where: { userId },
+  });
+
+  // If user has business profile, use it
+  if (businessProfile) {
+    return {
+      id: userId,
+      email: businessProfile.contact || 'user@example.com',
+      businessProfile,
+    };
+  }
+
+  // Otherwise, use sample data
+  return {
+    id: userId,
+    email: 'user@example.com',
+    businessProfile: {
+      name: 'Your Business Name',
+      location: '123 Business Street, City, State 12345',
+      contact: '+1 (555) 123-4567 | info@yourbusiness.com',
+      logo: null,
+    },
+  };
+}
+
+// ✅ ADD THIS METHOD
+private getSampleClientData() {
+  return {
+    id: 'sample-client',
+    name: 'Sample Client Company',
+    email: 'client@example.com',
+    phone: '+1 (555) 987-6543',
+    address: '456 Client Avenue, City, State 54321',
+    userId: 'sample-user',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+// ✅ ADD THIS METHOD
+async generateBusinessCopyPdf(invoice: any, user: any, client: any): Promise<Buffer> {
+  const template = invoice.template || 'MODERN';
   
+  const invoiceWithFlag = {
+    ...invoice,
+    isBusinessCopy: true, // ✅ Flag for watermark
+  };
+
+  switch (template) {
+    case 'BLUE_MODERN':
+      return await this.blueModernTemplate.generate(invoiceWithFlag, user, client);
+    case 'RED_ELEGANT':
+      return await this.redElegantTemplate.generate(invoiceWithFlag, user, client);
+    case 'MODERN':
+    default:
+      return await this.modernTemplate.generate(invoiceWithFlag, user, client);
+  }
+}
+
+
+
    async  findInvoiceByIdAndUserId(invoiceId:string, userId:string){
     const invoice = await this.prisma.invoice.findFirst({
       where: {
