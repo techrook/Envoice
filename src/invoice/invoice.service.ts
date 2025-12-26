@@ -1,6 +1,5 @@
 import {
   Injectable,
-  NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -125,22 +124,6 @@ export class InvoiceService {
       include: { client: true, items: true },
     });
   }
-
-  // async getInvoiceById(userId: string, invoiceId: string) {
-  //   const invoice = await this.prisma.invoice.findFirst({
-  //     where: {
-  //       id: invoiceId,
-  //       userId: userId,
-  //     },
-  //     include: { client: true, items: true }, // Include related data
-  //   });
-
-  //   if (!invoice) {
-  //     throw new NotFoundException(CONSTANT.INVOICE_NOT_FOUND);
-  //   }
-
-  //   return invoice;
-  // }
 
   async updateInvoice(
     userId: string,

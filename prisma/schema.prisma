@@ -18,7 +18,7 @@ model User {
   imageUrl      String?
   gender        String?
   country       String?
-  access_token  String?          @unique
+  access_token  String?          
   refresh_token String?
   verifiedToken String? 
   provider      String?          // Added field for social login provider
@@ -53,6 +53,7 @@ model BusinessProfile {
   logo      String?  
   location  String
   contact   String
+  currency  Currency @default(NGN)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -77,16 +78,17 @@ model Invoice {
   issueDate     DateTime
   dueDate       DateTime
   status        InvoiceStatus  @default(PENDING)
+  currency      Currency @default(NGN)
   notes         String?
   
   template       String   @default("MODERN")
-  taxName       String?        // e.g., "VAT", "GST"
-  taxRate       Float?         // e.g., 7.5 for 7.5%
+  taxName       String?       
+  taxRate       Float?         
 
-  discountType  DiscountType?  // 'PERCENTAGE' or 'FIXED'
-  discountValue Float?         // Applies to total invoice amount
+  discountType  DiscountType?  
+  discountValue Float?         
 
-  totalAmount   Float          // Final amount after discount + tax
+  totalAmount   Float          
 
   userId        String         @db.ObjectId
   user          User           @relation(fields: [userId], references: [id])
@@ -121,4 +123,10 @@ enum InvoiceStatus {
 enum DiscountType {
   PERCENTAGE
   FIXED
+}
+
+enum Currency {
+  NGN
+  USD
+  EUR
 }

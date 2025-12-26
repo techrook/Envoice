@@ -26,7 +26,6 @@ export class InvoiceController {
      private readonly prisma: PrismaService, 
   ) {}
 
-  // ✅ IMPORTANT: Templates endpoints MUST come BEFORE :id route
   @Get('templates')
   async getTemplates() {
     return this.invoiceService.getTemplates();
@@ -36,7 +35,7 @@ export class InvoiceController {
   async getTemplatePreview(
     @Param('template') template: string,
     @Req() req: any,
-    @Res() res: Response, // ✅ Now @Res is imported
+    @Res() res: Response, 
   ) {
     try {
       const validTemplates = ['MODERN', 'BLUE_MODERN', 'RED_ELEGANT'];
@@ -68,7 +67,7 @@ export class InvoiceController {
     }
   }
 
-// ✅ ADD THIS ENDPOINT (BEFORE :invoiceId route)
+
   @Get(':id/pdf')
   async downloadInvoicePdf(
     @Param('id') invoiceId: string,

@@ -1,7 +1,15 @@
 // src/business-profile/dto/create-business-profile.dto.ts
 
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+
+
+export enum Currency {
+  NGN = 'NGN',
+  USD = 'USD',
+  EUR = 'EUR',
+}
+
 
 export class CreateBusinessProfileDto {
   @ApiProperty({ example: 'My Business', description: 'Name of the business' })
@@ -18,6 +26,14 @@ export class CreateBusinessProfileDto {
   @IsString()
   @IsNotEmpty()
   contact: string;
+
+    @ApiProperty({
+    example: 'NGN',
+    enum: Currency,
+    description: 'Default currency associated with the business',
+  })
+  @IsEnum(Currency)
+  currency: Currency;
 }
 
 export class UpdateBusinessProfileDto {
@@ -36,5 +52,9 @@ export class UpdateBusinessProfileDto {
   @IsString()
   @IsOptional()
   contact?: string;
+
+  @IsOptional()
+  @IsEnum(Currency)
+  currency?: Currency;
 }
 

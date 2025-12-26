@@ -32,6 +32,12 @@ export enum InvoiceTemplate {
   RED_ELEGANT = 'RED_ELEGANT',
 }
 
+export enum Currency {
+  NGN = 'NGN',
+  USD = 'USD',
+  EUR = 'EUR',
+}
+
 
 class InvoiceItemDto {
   @ApiProperty()
@@ -79,7 +85,6 @@ export class CreateInvoiceDto {
   @IsString()
   notes?: string;
 
-  // ✅ NEW: Template field
   @IsEnum(InvoiceTemplate)
   @IsOptional()
   template?: InvoiceTemplate;
@@ -109,6 +114,14 @@ export class CreateInvoiceDto {
   @IsOptional()
   @IsString()
   taxName?: string;
+
+    @ApiProperty({
+    example: 'NGN',
+    enum: Currency,
+    description: 'Default currency associated with the business',
+  })
+  @IsEnum(Currency)
+  currency: Currency;
 }
 
 class UpdateInvoiceItemDto {
