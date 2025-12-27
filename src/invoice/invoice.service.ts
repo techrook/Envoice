@@ -166,7 +166,7 @@ export class InvoiceService {
       },
       include: { items: true }, // Return updated items
     });
-
+     await this.eventsManager.onInvoiceCreated(userId, invoice.clientId, updatedInvoice);
     return updatedInvoice;
   }
 

@@ -7,6 +7,10 @@ export class RedElegantTemplate {
   constructor(private prisma: any) {}
 
   async generate(invoice: any, user: User, client: Client): Promise<Buffer> {
+        const currency = invoice.currency 
+  // || businessProfile?.currency 
+  || 'USD';
+
     const doc = new PDFDocument({ margin: 40 });
     const buffers: Uint8Array[] = [];
 
@@ -23,22 +27,29 @@ export class RedElegantTemplate {
       const isBusinessCopy = invoice.isBusinessCopy === true;
 
       const getInvoiceStatus = () => {
-        if (invoice.status) {
-          const status = invoice.status.toUpperCase();
-          if (status === 'PAID') return { text: 'PAID', color: '#16a34a' };
-          if (status === 'PENDING') {
-            const dueDate = new Date(invoice.dueDate);
-            const now = new Date();
-            if (dueDate < now) return { text: 'OVERDUE', color: '#dc2626' };
-            return { text: 'PENDING', color: '#f59e0b' };
-          }
-        }
-        
-        const dueDate = new Date(invoice.dueDate);
-        const now = new Date();
-        if (dueDate < now) return { text: 'OVERDUE', color: '#dc2626' };
-        return { text: 'PENDING', color: '#f59e0b' };
-      };
+  const status = invoice.status?.toUpperCase();
+  const now = new Date();
+  const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
+
+  // 1️⃣ PAID is final
+  if (status === 'PAID') {
+    return { text: 'PAID', color: '#16a34a' };
+  }
+
+  // 2️⃣ Optional: CANCELLED / VOID
+  if (status === 'CANCELLED' || status === 'VOID') {
+    return { text: status, color: '#64748b' };
+  }
+
+  // 3️⃣ OVERDUE only if NOT paid
+  if (dueDate && dueDate < now) {
+    return { text: 'OVERDUE', color: '#dc2626' };
+  }
+
+  // 4️⃣ Default
+  return { text: 'PENDING', color: '#f59e0b' };
+};
+
 
       const invoiceStatus = getInvoiceStatus();
 
@@ -196,9 +207,9 @@ export class RedElegantTemplate {
 
         const centerY = y + (rowHeight / 2) - 5;
         doc.text((item.quantity ?? 0).toString(), 320, centerY, { width: 60, align: 'center' });
-        doc.text(`$${(item.unitPrice ?? 0).toFixed(2)}`, 400, centerY, { width: 70 });
+        doc.text(`${currency}${(item.unitPrice ?? 0).toFixed(2)}`, 400, centerY, { width: 70 });
         doc.fillColor('#991b1b').font('Helvetica-Bold')
-          .text(`$${amount.toFixed(2)}`, 480, centerY, { width: 70, align: 'right' });
+          .text(`${currency}${amount.toFixed(2)}`, 480, centerY, { width: 70, align: 'right' });
 
         y += rowHeight;
         doc.font('Helvetica');
@@ -213,13 +224,13 @@ export class RedElegantTemplate {
 
       if (invoice.invoiceDiscount && invoice.invoiceDiscount > 0) {
         const discountLabel = invoice.discountType === 'PERCENTAGE'
-          ? `${invoice.discountValue ?? 0}%`
-          : `$${(invoice.discountValue ?? 0).toFixed(2)}`;
+          ? `${currency}${invoice.discountValue ?? 0}%`
+          : `${currency}${(invoice.discountValue ?? 0).toFixed(2)}`;
 
         doc.fontSize(9).fillColor('#6b7280').font('Helvetica')
           .text(`Discount (${discountLabel}):`, summaryX, y, { width: 120, align: 'right' })
           .fillColor('#dc2626').font('Helvetica-Bold')
-          .text(`-$${(invoice.invoiceDiscount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 80, align: 'right' });
+          .text(`-${currency}${(invoice.invoiceDiscount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 80, align: 'right' });
         y += 18;
       }
 
@@ -227,7 +238,7 @@ export class RedElegantTemplate {
         doc.fillColor('#6b7280').font('Helvetica')
           .text(`${invoice.taxName || 'Tax'} (${invoice.taxRate ?? 0}%):`, summaryX, y, { width: 120, align: 'right' })
           .fillColor('#111827').font('Helvetica-Bold')
-          .text(`$${(invoice.taxAmount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 80, align: 'right' });
+          .text(`${currency}${(invoice.taxAmount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 80, align: 'right' });
         y += 25;
       } else {
         y += 10;
@@ -237,7 +248,7 @@ export class RedElegantTemplate {
       doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold')
         .text('Total Amount Due:', summaryX, y, { width: 120, align: 'right' })
         .fontSize(16).fillColor('#991b1b')
-        .text(`$${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 80, align: 'right' });
+        .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 80, align: 'right' });
 
       // Signature Line
       y += 80;

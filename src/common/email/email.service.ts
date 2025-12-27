@@ -187,14 +187,7 @@ export class EmailService {
         },
       ];
   
-      // 4. Dispatch the email with attachment
-      await this.dispatchMail({
-        email: user.email,
-        username: user.username,
-        subject: `Invoice #${invoice.invoiceNumber} from Envoice`,
-        content: htmlContent,
-        attachments,
-      });
+
       await this.dispatchMail({
         email: client.email,
         username: client.name,

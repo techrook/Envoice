@@ -7,6 +7,11 @@ export class BlueModernTemplate {
   constructor(private prisma: any) {}
 
   async generate(invoice: any, user: User, client: Client): Promise<Buffer> {
+
+    const currency = invoice.currency 
+  // || businessProfile?.currency 
+  || 'USD';
+
     const doc = new PDFDocument({ margin: 50 });
     const buffers: Uint8Array[] = [];
 
@@ -22,26 +27,35 @@ export class BlueModernTemplate {
 
       const isBusinessCopy = invoice.isBusinessCopy === true;
 
-      const getInvoiceStatus = () => {
-        if (invoice.status) {
-          const status = invoice.status.toUpperCase();
-          if (status === 'PAID') return { text: 'PAID', color: '#16a34a' };
-          if (status === 'PENDING') {
-            const dueDate = new Date(invoice.dueDate);
-            const now = new Date();
-            if (dueDate < now) return { text: 'OVERDUE', color: '#dc2626' };
-            return { text: 'PENDING', color: '#f59e0b' };
-          }
-        }
-        
-        const dueDate = new Date(invoice.dueDate);
-        const now = new Date();
-        if (dueDate < now) return { text: 'OVERDUE', color: '#dc2626' };
-        return { text: 'PENDING', color: '#f59e0b' };
-      };
+const getInvoiceStatus = () => {
+  const status = invoice.status?.toUpperCase();
+  const now = new Date();
+  const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
+
+  // 1️⃣ PAID is final
+  if (status === 'PAID') {
+    return { text: 'PAID', color: '#16a34a' };
+  }
+
+  // 2️⃣ Optional: CANCELLED / VOID
+  if (status === 'CANCELLED' || status === 'VOID') {
+    return { text: status, color: '#64748b' };
+  }
+
+  // 3️⃣ OVERDUE only if NOT paid
+  if (dueDate && dueDate < now) {
+    return { text: 'OVERDUE', color: '#dc2626' };
+  }
+
+  // 4️⃣ Default
+  return { text: 'PENDING', color: '#f59e0b' };
+};
+
 
       const invoiceStatus = getInvoiceStatus();
-
+  console.log("invoiceStatus",invoiceStatus)
+  console.log("currency",currency)
+  console.log("currency",currency)  
       const formatDate = (dateString: string) => {
         try {
           const date = new Date(dateString);
@@ -133,6 +147,8 @@ export class BlueModernTemplate {
         .text('INVOICE NUMBER', 390, detailsY + 5);
       doc.fontSize(10).font('Helvetica')
         .text(`#${invoice.invoiceNumber}`, 390, detailsY + 17, { width: 160 });
+      
+
 
       // Issue Date Box
       doc.rect(380, detailsY + 35, 85, 30).fill('#0c4a6e');
@@ -197,10 +213,11 @@ export class BlueModernTemplate {
 
         const centerY = y + (rowHeight / 2) - 5;
         doc.text((item.quantity ?? 0).toString(), 350, centerY, { width: 45 });
-        doc.text(`$${(item.unitPrice ?? 0).toFixed(2)}`, 405, centerY, { width: 50 });
-        doc.text(`$${(item.discount ?? 0).toFixed(2)}`, 465, centerY, { width: 35 });
+        doc.text(`${currency}${(item.unitPrice ?? 0).toFixed(2)}`, 405, centerY, { width: 50 });
+        doc.text(`${currency}${(item.discount ?? 0).toFixed(2)}`, 465, centerY, { width: 35 });
         doc.fillColor('#0369a1').font('Helvetica-Bold')
-          .text(`$${amount.toFixed(2)}`, 510, centerY, { width: 45, align: 'right' });
+          doc.text(`${currency}${amount.toFixed(2)}`
+, 510, centerY, { width: 45, align: 'right' });
 
         y += rowHeight;
         doc.font('Helvetica');
@@ -213,21 +230,26 @@ export class BlueModernTemplate {
       y += 25;
       const summaryX = 380;
 
+
+      doc.fontSize(8).fillColor('#64748b')
+  .text(`Currency: ${currency}`, summaryX, y + 40);
+      
+
       doc.fontSize(10).fillColor('#475569')
         .text('Subtotal:', summaryX, y, { width: 100, align: 'right' })
         .fillColor('#1e293b').font('Helvetica-Bold')
-        .text(`$${subTotal.toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+        .text(`${currency}${subTotal.toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
 
       if (invoice.invoiceDiscount && invoice.invoiceDiscount > 0) {
         y += 20;
         const discountLabel = invoice.discountType === 'PERCENTAGE'
-          ? `${invoice.discountValue ?? 0}%`
-          : `$${(invoice.discountValue ?? 0).toFixed(2)}`;
+          ? `${currency}${(invoice.discountValue ?? 0).toFixed(2)}%`
+          : `${currency}${(invoice.discountValue ?? 0).toFixed(2)}`;
 
         doc.fillColor('#475569').font('Helvetica')
           .text(`Discount (${discountLabel}):`, summaryX, y, { width: 100, align: 'right' })
           .fillColor('#dc2626').font('Helvetica-Bold')
-          .text(`-$${(invoice.invoiceDiscount ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+          .text(`-${currency}${(invoice.invoiceDiscount ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
       }
 
       if (invoice.taxAmount && invoice.taxAmount > 0) {
@@ -235,7 +257,7 @@ export class BlueModernTemplate {
         doc.fillColor('#475569').font('Helvetica')
           .text(`${invoice.taxName || 'Tax'} (${invoice.taxRate ?? 0}%):`, summaryX, y, { width: 100, align: 'right' })
           .fillColor('#1e293b').font('Helvetica-Bold')
-          .text(`$${(invoice.taxAmount ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+          .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
       }
 
       // Total Box (Dark Blue)
@@ -245,7 +267,7 @@ export class BlueModernTemplate {
       doc.fillColor('#ffffff').fontSize(14).font('Helvetica-Bold')
         .text('TOTAL', summaryX + 10, y + 5, { width: 80 })
         .fontSize(16)
-        .text(`$${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 110, y + 5, { width: 100, align: 'right' });
+        .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 110, y + 5, { width: 100, align: 'right' });
 
       // Notes
       y += 60;
