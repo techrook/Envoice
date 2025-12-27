@@ -177,7 +177,8 @@ export class EmailService {
         .replace('{{username}}', AppUtilities.capitalizeFirstLetter(client.name))
         .replace('{{invoiceNumber}}', invoice.invoiceNumber)
         .replace('{{totalAmount}}', invoice.totalAmount.toFixed(2))
-        .replace('{{status}}', `${invoice.status}`);
+        .replace('{{status}}', `${invoice.status}`)
+        .replace('{{currency}}', `${invoice.currency}`);
   
       // 3. Build attachment
       const attachments = [
