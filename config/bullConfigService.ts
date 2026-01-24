@@ -13,7 +13,6 @@ const { AuthQ,BusinessQ,InvoiceQ, } = CONSTANT;
       useFactory: (cfg: ConfigService) => ({
         connection: {
           url: cfg.get<string>('REDIS_URL'),
-          tls: {}, 
         },
       }),
     }),
