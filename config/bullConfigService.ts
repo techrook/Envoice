@@ -9,15 +9,15 @@ const { AuthQ,BusinessQ,InvoiceQ, } = CONSTANT;
 @Module({
   imports: [
     BullModule.forRootAsync({
-      useFactory: async (cfg: ConfigService) => ({
+      inject: [ConfigService],
+      useFactory: (cfg: ConfigService) => ({
         connection: {
-          host: cfg.get<string>('Queue.host'),
-          password: cfg.get<string>('Queue.pass'),
-          port: cfg.get<number>('Queue.port'),
+          url: cfg.get<string>('REDIS_URL'),
+          tls: {}, 
         },
       }),
-      inject: [ConfigService],
     }),
+    
 
     BullModule.registerQueue({ name: AuthQ }),
     BullModule.registerQueue({ name: BusinessQ }),
