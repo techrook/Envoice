@@ -18,7 +18,7 @@ async function bootstrap() {
     // ✅ Enable CORS with credentials support
     app.enableCors({
       origin: process.env.ALLOWED_ORIGINS?.split(',') || [
-
+        'https://www.envoice.site'
        'http://localhost:3000',
       ],
       credentials: true,
