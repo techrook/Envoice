@@ -185,11 +185,11 @@ const getInvoiceStatus = () => {
       doc.rect(50, tableTop, 510, 28).fill('#06b6d4');
 
       doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold')
-        .text('DESCRIPTION', 60, tableTop + 9)
-        .text('QTY', 350, tableTop + 9)
-        .text('PRICE', 405, tableTop + 9)
-        .text('DISC', 465, tableTop + 9)
-        .text('TOTAL', 510, tableTop + 9, { width: 45, align: 'right' });
+       .text('DESCRIPTION', 60, tableTop + 9)
+        .text('QTY', 280, tableTop + 9)             
+        .text('PRICE', 320, tableTop + 9)            
+        .text('DISC', 415, tableTop + 9)
+        .text('TOTAL', 480, tableTop + 9, { width: 45, align: 'right' });
 
       // Table Rows
       let y = tableTop + 38;
@@ -199,8 +199,8 @@ const getInvoiceStatus = () => {
         const amount = item.amount ?? 0;
         subTotal += amount;
 
-        const descWidth = 280;
-        doc.fontSize(9).font('Helvetica');
+        const descWidth = 210;
+        doc.fontSize(8).font('Helvetica');
         const descHeight = doc.heightOfString(item.description || '', { width: descWidth });
         const rowHeight = Math.max(25, descHeight + 10);
 
@@ -211,13 +211,13 @@ const getInvoiceStatus = () => {
         doc.fillColor('#1e293b').fontSize(9).font('Helvetica')
           .text(item.description || '', 60, y + 3, { width: descWidth, lineGap: 1 });
 
-        const centerY = y + (rowHeight / 2) - 5;
-        doc.text((item.quantity ?? 0).toString(), 350, centerY, { width: 45 });
-        doc.text(`${currency}${(item.unitPrice ?? 0).toFixed(2)}`, 405, centerY, { width: 50 });
-        doc.text(`${currency}${(item.discount ?? 0).toFixed(2)}`, 465, centerY, { width: 35 });
+        const centerY = y + (rowHeight / 2) - 4;
+       doc.text((item.quantity ?? 0).toString(), 280, centerY, { width: 30 });
+        doc.text(`${currency}${(item.unitPrice ?? 0).toFixed(2)}`, 320, centerY, { width: 90 });
+        doc.text(`${currency}${(item.discount ?? 0).toFixed(2)}`, 415, centerY, { width: 80 });
         doc.fillColor('#0369a1').font('Helvetica-Bold')
           doc.text(`${currency}${amount.toFixed(2)}`
-, 510, centerY, { width: 45, align: 'right' });
+, 480, centerY, { width: 75, align: 'right' });
 
         y += rowHeight;
         doc.font('Helvetica');
@@ -262,11 +262,11 @@ const getInvoiceStatus = () => {
 
       // Total Box (Dark Blue)
       y += 30;
-      doc.rect(summaryX, y - 10, 220, 38).fill('#0c4a6e');
+      doc.rect(380, y - 10, 180, 38).fill('#0c4a6e')
 
       doc.fillColor('#ffffff').fontSize(14).font('Helvetica-Bold')
         .text('TOTAL', summaryX + 10, y + 5, { width: 80 })
-        .fontSize(16)
+        .fontSize(13)
         .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 110, y + 5, { width: 100, align: 'right' });
 
       // Notes
@@ -282,10 +282,10 @@ const getInvoiceStatus = () => {
       // Footer
       if (isBusinessCopy) {
         doc.fontSize(8).fillColor('#dc2626').font('Helvetica-Bold')
-          .text('BUSINESS COPY - This is a copy for your records. Not valid for payment.', 50, 755, { align: 'center', width: 510 });
+          .text('BUSINESS COPY - This is a copy for your records. Not valid for payment  Made with Envoice.', 50, 755, { align: 'center', width: 510 });
       } else {
         doc.fontSize(8).fillColor('#64748b').font('Helvetica')
-          .text('Thank you for your business!', 50, 760, { align: 'center', width: 510 });
+          .text('Thank you for your business! Made with Envoice', 50, 760, { align: 'center', width: 510 });
       }
 
       doc.end();

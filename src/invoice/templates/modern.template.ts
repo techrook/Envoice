@@ -235,10 +235,10 @@ export class ModernTemplate {
       // Footer
       if (isBusinessCopy) {
         doc.fontSize(8).fillColor('#dc2626').font('Helvetica-Bold')
-          .text('BUSINESS COPY - This is a copy for your records. Not valid for payment.', 50, 745, { align: 'center', width: 500 });
+          .text('BUSINESS COPY - This is a copy for your records. Not valid for payment. Made with Envoice', 50, 745, { align: 'center', width: 500 });
       } else {
         doc.fontSize(8).fillColor('#94a3b8').font('Helvetica')
-          .text('This is a computer-generated invoice.', 50, 750, { align: 'center', width: 500 });
+          .text('Thank you for your business . Made with Envoice', 50, 750, { align: 'center', width: 500 });
       }
 
       doc.end();
