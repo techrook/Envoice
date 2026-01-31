@@ -91,28 +91,36 @@ export class EmailService {
   /**
    * Send confirmation email to user
    */
-  async sendConfirmationEmail(user: User) {
-    try {
-      const token = await this.generateEmailConfirmationToken(user.id);
-      const confirmUrl = `${this.cfg.get('FRONTEND_URL')}/auth/login?token=${token}`;
-      const htmlTemplate = this.prepMailContent('confirmEmail.html');
-      const htmlContent = htmlTemplate.replace('{{confirmUrl}}', confirmUrl);
+async sendConfirmationEmail(user: User) {
+  try {
+    const token = await this.generateEmailConfirmationToken(user.id);
+    const confirmUrl = `${this.cfg.get('FRONTEND_URL')}/verify-email?token=${token}`;
+    const appName = 'Envoice';
+    
+    let htmlContent = this.prepMailContent('confirmEmail.html');
 
-      const opts = {
-        email: user.email,
-        username: user.username,
-        subject: MAIL.confirmEmail,
-        content: htmlContent,
-      };
+    // ✅ Use a global Regex /.../g to replace ALL occurrences of the URL
+    htmlContent = htmlContent.replace(/{{confirmUrl}}/g, confirmUrl);
+    
+    // ✅ Manually replace the other placeholders
+    htmlContent = htmlContent.replace(/{{username}}/g, user.username || 'User');
+    htmlContent = htmlContent.replace(/{{appName}}/g, appName);
+    htmlContent = htmlContent.replace(/{{year}}/g, new Date().getFullYear().toString());
 
-      await this.dispatchMail(opts);
-      this.logger.log(`✅ Confirmation email sent to ${user.email}`);
-    } catch (err) {
-      this.logger.error('❌ Confirmation email error:', err);
-      throw new BadRequestException({ status: 403, error: CONSTANT.OOPS });
-    }
+    const opts = {
+      email: user.email,
+      username: user.username, // Keeping this for your dispatcher logs
+      subject: MAIL.confirmEmail,
+      content: htmlContent,
+    };
+
+    await this.dispatchMail(opts);
+    this.logger.log(`✅ Confirmation email sent to ${user.email}`);
+  } catch (err) {
+    this.logger.error('❌ Confirmation email error:', err);
+    throw new BadRequestException({ status: 403, error: CONSTANT.OOPS });
   }
-
+}
   /**
    * Generate email confirmation token
    */
@@ -136,7 +144,7 @@ export class EmailService {
         data: { verifiedToken: token },
       });
       
-      const resetUrl = `${this.cfg.get('FRONTEND_URL')}/forgot-password?token=${token}`;
+      const resetUrl = `${this.cfg.get('FRONTEND_URL')}/reset-password?token=${token}`;
       console.log('🔐 Password reset URL:', resetUrl);
       
       const htmlTemplate = this.prepMailContent('reqPasswordReset.html');

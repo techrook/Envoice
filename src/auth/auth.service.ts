@@ -152,14 +152,25 @@ export class AuthService {
 
     return { accessToken };
   }
-  async confirmEmail(token: string) {
-    const userId = await this.verifyToken(token);
 
-    const accessToken = TokenUtil.signAccessToken(this.jwtService, userId);
-    const refreshToken = TokenUtil.signRefreshToken(this.jwtService, userId);
-    this.eventsManager.onEmailConfirmation(userId);
-    return { accessToken, refreshToken };
-  }
+async confirmEmail(token: string) {
+  const userId = await this.verifyToken(token);
+
+  // Update the user to verified!
+  await this.prisma.user.update({
+    where: { id: userId },
+    data: { 
+      emailVerified: true,
+      verifiedToken: null 
+    },
+  });
+
+  const accessToken = TokenUtil.signAccessToken(this.jwtService, userId);
+  const refreshToken = TokenUtil.signRefreshToken(this.jwtService, userId);
+  this.eventsManager.onEmailConfirmation(userId);
+  
+  return { accessToken, refreshToken };
+}
 
   async verifyToken(token: string) {
     const user = await this.prisma.user.findFirst({
@@ -181,8 +192,12 @@ export class AuthService {
     }
 
     this.eventsManager.onPasswordReset(user, QueuePriority.level1());
-    return RESET_MAIL(dto.email);
-  }
+    
+    
+    return { 
+        message: RESET_MAIL(dto.email) 
+    };
+}
 
   async resetPassword(dto: ResetPasswordDto) {
     const isUser = await this.verifyToken(dto.token);

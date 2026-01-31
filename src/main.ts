@@ -10,7 +10,24 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
-  app.useLogger(app.get(AppLogger));
+  app.useLogger(app.get(AppLogger));  
+  
+  
+
+
+    // ✅ Enable CORS with credentials support
+    app.enableCors({
+      origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+
+       'http://localhost:3000',
+      ],
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+      exposedHeaders: ['Set-Cookie'],
+    });
+
+
 
   const configService = app.get<ConfigService>(ConfigService);
   app.useGlobalPipes(
@@ -35,6 +52,8 @@ async function bootstrap() {
       );
       next();
     });
+
+
   
     const config = new DocumentBuilder()
       .setTitle(appName)
@@ -54,7 +73,7 @@ async function bootstrap() {
         persistAuthorization: true,
       },
     });
-  };
+  };    
   
 
   logger.log(`Starting [${configService.get('appName')}] on port=[${port}]`);

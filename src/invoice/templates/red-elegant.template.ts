@@ -259,10 +259,10 @@ export class RedElegantTemplate {
       // Footer Message
       if (isBusinessCopy) {
         doc.fontSize(7).fillColor('#dc2626').font('Helvetica-Bold')
-          .text('BUSINESS COPY - This is a copy for your records. Not valid for payment.', 50, 745, { align: 'center', width: 510 });
+          .text('BUSINESS COPY - This is a copy for your records. Not valid for payment. Made with Envoice', 50, 745, { align: 'center', width: 510 });
       } else {
         doc.fontSize(8).fillColor('#6b7280').font('Helvetica')
-          .text('Thank you for choosing our services! We appreciate the opportunity to work with you.', 50, 735, { align: 'center', width: 510 })
+          .text('Thank you for choosing our services! We appreciate the opportunity to work with you. Made with Envoice', 50, 735, { align: 'center', width: 510 })
           .fontSize(7)
           .text('Please make the payment within 30 days of receiving this invoice.', 50, 750, { align: 'center', width: 510 });
       }
