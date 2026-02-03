@@ -7,10 +7,7 @@ export class BlueModernTemplate {
   constructor(private prisma: any) {}
 
   async generate(invoice: any, user: User, client: Client): Promise<Buffer> {
-
-    const currency = invoice.currency 
-  // || businessProfile?.currency 
-  || 'USD';
+    const currency = invoice.currency || 'USD';
 
     const doc = new PDFDocument({ margin: 50 });
     const buffers: Uint8Array[] = [];
@@ -27,35 +24,25 @@ export class BlueModernTemplate {
 
       const isBusinessCopy = invoice.isBusinessCopy === true;
 
-const getInvoiceStatus = () => {
-  const status = invoice.status?.toUpperCase();
-  const now = new Date();
-  const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
+      const getInvoiceStatus = () => {
+        const status = invoice.status?.toUpperCase();
+        const now = new Date();
+        const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
 
-  // 1️⃣ PAID is final
-  if (status === 'PAID') {
-    return { text: 'PAID', color: '#16a34a' };
-  }
-
-  // 2️⃣ Optional: CANCELLED / VOID
-  if (status === 'CANCELLED' || status === 'VOID') {
-    return { text: status, color: '#64748b' };
-  }
-
-  // 3️⃣ OVERDUE only if NOT paid
-  if (dueDate && dueDate < now) {
-    return { text: 'OVERDUE', color: '#dc2626' };
-  }
-
-  // 4️⃣ Default
-  return { text: 'PENDING', color: '#f59e0b' };
-};
-
+        if (status === 'PAID') {
+          return { text: 'PAID', color: '#16a34a' };
+        }
+        if (status === 'CANCELLED' || status === 'VOID') {
+          return { text: status, color: '#64748b' };
+        }
+        if (dueDate && dueDate < now) {
+          return { text: 'OVERDUE', color: '#dc2626' };
+        }
+        return { text: 'PENDING', color: '#f59e0b' };
+      };
 
       const invoiceStatus = getInvoiceStatus();
-  console.log("invoiceStatus",invoiceStatus)
-  console.log("currency",currency)
-  console.log("currency",currency)  
+      
       const formatDate = (dateString: string) => {
         try {
           const date = new Date(dateString);
@@ -133,12 +120,7 @@ const getInvoiceStatus = () => {
         .text(businessProfile?.location || '', 120, 52)
         .text(businessProfile?.contact || '', 120, 65);
 
-   
-
-      // White background for content
       doc.fillColor('#000000');
-
-      // Invoice Details (Dark boxes on light blue background)
       const detailsY = 130;
 
       // Invoice Number Box
@@ -147,8 +129,6 @@ const getInvoiceStatus = () => {
         .text('INVOICE NUMBER', 390, detailsY + 5);
       doc.fontSize(10).font('Helvetica')
         .text(`#${invoice.invoiceNumber}`, 390, detailsY + 17, { width: 160 });
-      
-
 
       // Issue Date Box
       doc.rect(380, detailsY + 35, 85, 30).fill('#0c4a6e');
@@ -167,29 +147,25 @@ const getInvoiceStatus = () => {
       // Bill To Section
       doc.fillColor('#0369a1').fontSize(11).font('Helvetica-Bold')
         .text('BILL TO:', 50, detailsY);
-
       doc.fillColor('#1e293b').fontSize(11).font('Helvetica-Bold')
         .text(client.name, 50, detailsY + 20);
-
       doc.fontSize(9).font('Helvetica').fillColor('#475569')
         .text(client.email || '', 50, detailsY + 37)
         .text(client.phone || '', 50, detailsY + 50)
         .text(client.address || '', 50, detailsY + 63, { width: 250 });
 
-      // Light blue separator line
       doc.moveTo(50, detailsY + 95).lineTo(560, detailsY + 95)
         .lineWidth(1).stroke('#bae6fd');
 
-      // Table Header (Cyan background)
-      const tableTop = detailsY + 115;
+      // Table Header
+      const tableTop = detailsY + 115;      
       doc.rect(50, tableTop, 510, 28).fill('#06b6d4');
-
       doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold')
-       .text('DESCRIPTION', 60, tableTop + 9)
-        .text('QTY', 280, tableTop + 9)             
-        .text('PRICE', 320, tableTop + 9)            
-        .text('DISC', 415, tableTop + 9)
-        .text('TOTAL', 480, tableTop + 9, { width: 45, align: 'right' });
+        .text('DESCRIPTION', 60, tableTop + 9)
+        .text('QTY', 280, tableTop + 9)
+        .text('PRICE', 330, tableTop + 9)
+        .text('DISC', 420, tableTop + 9)
+        .text('AMOUNT', 480, tableTop + 9, { width: 75, align: 'right' });
 
       // Table Rows
       let y = tableTop + 38;
@@ -198,7 +174,6 @@ const getInvoiceStatus = () => {
       invoice.items?.forEach((item: any, index: number) => {
         const amount = item.amount ?? 0;
         subTotal += amount;
-
         const descWidth = 210;
         doc.fontSize(8).font('Helvetica');
         const descHeight = doc.heightOfString(item.description || '', { width: descWidth });
@@ -212,62 +187,58 @@ const getInvoiceStatus = () => {
           .text(item.description || '', 60, y + 3, { width: descWidth, lineGap: 1 });
 
         const centerY = y + (rowHeight / 2) - 4;
-       doc.text((item.quantity ?? 0).toString(), 280, centerY, { width: 30 });
-        doc.text(`${currency}${(item.unitPrice ?? 0).toFixed(2)}`, 320, centerY, { width: 90 });
-        doc.text(`${currency}${(item.discount ?? 0).toFixed(2)}`, 415, centerY, { width: 80 });
+        doc.text((item.quantity ?? 0).toString(), 280, centerY, { width: 30 });
+        doc.text(`${currency}${Number(item.unitPrice ?? 0).toFixed(2)}`, 330, centerY, { width: 85 });
+        doc.text(`${currency}${Number(item.discount ?? 0).toFixed(2)}`, 420, centerY, { width: 60 });
+        
         doc.fillColor('#0369a1').font('Helvetica-Bold')
-          doc.text(`${currency}${amount.toFixed(2)}`
-, 480, centerY, { width: 75, align: 'right' });
+          .text(`${currency}${Number(amount).toFixed(2)}`, 480, centerY, { width: 75, align: 'right' });
 
         y += rowHeight;
-        doc.font('Helvetica');
       });
 
-      // Blue separator
       doc.moveTo(50, y).lineTo(560, y).lineWidth(2).stroke('#0369a1');
 
-      // Summary
+      // Summary Section
       y += 25;
-      const summaryX = 380;
+      const summaryX = 360;
 
-
-      doc.fontSize(8).fillColor('#64748b')
-  .text(`Currency: ${currency}`, summaryX, y + 40);
-      
-
-      doc.fontSize(10).fillColor('#475569')
+      // Subtotal
+      doc.fontSize(10).fillColor('#475569').font('Helvetica')
         .text('Subtotal:', summaryX, y, { width: 100, align: 'right' })
         .fillColor('#1e293b').font('Helvetica-Bold')
-        .text(`${currency}${subTotal.toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+        .text(`${currency}${Number(subTotal).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
 
-      if (invoice.invoiceDiscount && invoice.invoiceDiscount > 0) {
+      // Discount Logic - More robust checking
+      if (invoice.discountValue != null && Number(invoice.discountValue) > 0) {
         y += 20;
         const discountLabel = invoice.discountType === 'PERCENTAGE'
-          ? `${currency}${(invoice.discountValue ?? 0).toFixed(2)}%`
-          : `${currency}${(invoice.discountValue ?? 0).toFixed(2)}`;
+          ? `Discount (${Number(invoice.discountValue ?? 0).toFixed(0)}%):`
+          : `Discount:`;
 
         doc.fillColor('#475569').font('Helvetica')
-          .text(`Discount (${discountLabel}):`, summaryX, y, { width: 100, align: 'right' })
+          .text(discountLabel, summaryX, y, { width: 100, align: 'right' })
           .fillColor('#dc2626').font('Helvetica-Bold')
-          .text(`-${currency}${(invoice.invoiceDiscount ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+          .text(`-${currency}${Number(invoice.discountValue).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
       }
 
-      if (invoice.taxAmount && invoice.taxAmount > 0) {
+      // Tax Logic - More robust checking
+      if (invoice.taxRate != null && Number(invoice.taxRate) > 0) {
         y += 20;
+        const taxLabel = `${invoice.taxName || 'Tax'} (${Number(invoice.taxRate ?? 0).toFixed(0)}%):`;
+        
         doc.fillColor('#475569').font('Helvetica')
-          .text(`${invoice.taxName || 'Tax'} (${invoice.taxRate ?? 0}%):`, summaryX, y, { width: 100, align: 'right' })
+          .text(taxLabel, summaryX, y, { width: 100, align: 'right' })
           .fillColor('#1e293b').font('Helvetica-Bold')
-          .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+          .text(`${currency}${Number(invoice.taxRate).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
       }
 
-      // Total Box (Dark Blue)
+      // Total Box
       y += 30;
-      doc.rect(380, y - 10, 180, 38).fill('#0c4a6e')
-
-      doc.fillColor('#ffffff').fontSize(14).font('Helvetica-Bold')
-        .text('TOTAL', summaryX + 10, y + 5, { width: 80 })
-        .fontSize(13)
-        .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 110, y + 5, { width: 100, align: 'right' });
+      doc.rect(380, y - 10, 180, 38).fill('#0c4a6e');
+      doc.fillColor('#ffffff').fontSize(13).font('Helvetica-Bold')
+        .text('TOTAL:', 390, y + 5, { width: 60 })
+        .text(`${currency}${Number(invoice.totalAmount ?? 0).toFixed(2)}`, 440, y + 5, { width: 110, align: 'right' });
 
       // Notes
       y += 60;
@@ -280,12 +251,13 @@ const getInvoiceStatus = () => {
       }
 
       // Footer
+      const footerY = 760;
       if (isBusinessCopy) {
         doc.fontSize(8).fillColor('#dc2626').font('Helvetica-Bold')
-          .text('BUSINESS COPY - This is a copy for your records. Not valid for payment  Made with Envoice.', 50, 755, { align: 'center', width: 510 });
+          .text('BUSINESS COPY - This is a copy for your records. Not valid for payment. Made with Envoice.', 50, footerY, { align: 'center', width: 510 });
       } else {
         doc.fontSize(8).fillColor('#64748b').font('Helvetica')
-          .text('Thank you for your business! Made with Envoice', 50, 760, { align: 'center', width: 510 });
+          .text('Thank you for your business! Made with Envoice', 50, footerY, { align: 'center', width: 510 });
       }
 
       doc.end();

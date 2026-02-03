@@ -68,40 +68,49 @@ export class InvoiceController {
   }
 
 
-  @Get(':id/pdf')
-  async downloadInvoicePdf(
-    @Param('id') invoiceId: string,
-    @Req() req: any,
-    @Res() res: Response,
-  ) {
-    try {
-      const invoice = await this.invoiceService.findInvoiceByIdAndUserId(
-        invoiceId,
-        req.user.id,
-      );
+ @Get(':id/pdf')
+async downloadInvoicePdf(
+  @Param('id') invoiceId: string,
+  @Req() req: any,
+  @Res() res: Response,
+) {
+  try {
+    // 1. Ensure this method returns items, client, taxAmount, and invoiceDiscount
+    const invoice = await this.invoiceService.findInvoiceByIdAndUserId(
+      invoiceId,
+      req.user.id,
+    );
 
-      if (!invoice) {
-        return res.status(404).json({ message: 'Invoice not found' });
-      }
-
-      const user = await this.prisma.user.findUnique({
-        where: { id: req.user.id },
-      });
-
-      const pdfBuffer = await this.invoiceService.generateBusinessCopyPdf(
-        invoice,
-        user,
-        invoice.client,
-      );
-
-      const filename = `BUSINESS-COPY-${invoice.id.slice(0, 8)}.pdf`;
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.send(pdfBuffer);
-    } catch (error) {
-      return res.status(500).json({ message: 'Failed to generate PDF' });
+    if (!invoice) {
+      return res.status(404).json({ message: 'Invoice not found' });
     }
+
+    // 2. Debugging: Log this to your terminal to see if the values exist
+    console.log('PDF Data Check:', {
+      tax: invoice.taxRate,   
+      discount: invoice.discountValue,
+      itemCount: invoice.items?.length
+    });
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: req.user.id },
+    });   
+
+    const pdfBuffer = await this.invoiceService.generateBusinessCopyPdf(
+      invoice,
+      user,
+      invoice.client, // Ensure client is loaded
+    );
+
+    const filename = `BUSINESS-COPY-${invoice.invoiceNumber || invoice.id.slice(0, 8)}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Failed to generate PDF' });
   }
+}
 
   @Post('create')
   @ApiOperation({ summary: 'Create an invoice' })
