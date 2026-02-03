@@ -181,9 +181,9 @@ export class RedElegantTemplate {
 
       doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold')
         .text('ITEM DESCRIPTION', 60, tableTop + 10)
-        .text('QUANTITY', 320, tableTop + 10)
-        .text('UNIT PRICE', 400, tableTop + 10)
-        .text('TOTAL PRICE', 480, tableTop + 10, { width: 70, align: 'right' });
+        .text('QTY', 320, tableTop + 10)
+        .text('UNIT PRICE', 380, tableTop + 10)
+        .text('TOTAL', 480, tableTop + 10);
 
       // Table Rows
       let y = tableTop + 40;
@@ -206,10 +206,10 @@ export class RedElegantTemplate {
           .text(item.description || '', 60, y + 3, { width: descWidth, lineGap: 1 });
 
         const centerY = y + (rowHeight / 2) - 5;
-        doc.text((item.quantity ?? 0).toString(), 320, centerY, { width: 60, align: 'center' });
-        doc.text(`${currency}${(item.unitPrice ?? 0).toFixed(2)}`, 400, centerY, { width: 70 });
+        doc.text((item.quantity ?? 0).toString(), 320, centerY, { width: 50, align: 'center' });
+        doc.text(`${currency}${(item.unitPrice ?? 0).toFixed(2)}`, 380, centerY, { width: 90 });
         doc.fillColor('#991b1b').font('Helvetica-Bold')
-          .text(`${currency}${amount.toFixed(2)}`, 480, centerY, { width: 70, align: 'right' });
+          .text(`${currency}${amount.toFixed(2)}`, 480, centerY, { width: 80 });
 
         y += rowHeight;
         doc.font('Helvetica');
@@ -220,25 +220,25 @@ export class RedElegantTemplate {
 
       // Summary on right side
       y += 20;
-      const summaryX = 350;
+      const summaryX = 340;
 
-      if (invoice.invoiceDiscount && invoice.invoiceDiscount > 0) {
+      if (invoice.discountValue && invoice.discountValue > 0) {
         const discountLabel = invoice.discountType === 'PERCENTAGE'
-          ? `${currency}${invoice.discountValue ?? 0}%`
+          ? `${(invoice.discountValue ?? 0).toFixed(2)}%`
           : `${currency}${(invoice.discountValue ?? 0).toFixed(2)}`;
 
         doc.fontSize(9).fillColor('#6b7280').font('Helvetica')
           .text(`Discount (${discountLabel}):`, summaryX, y, { width: 120, align: 'right' })
           .fillColor('#dc2626').font('Helvetica-Bold')
-          .text(`-${currency}${(invoice.invoiceDiscount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 80, align: 'right' });
+          .text(`-${currency}${(invoice.discountValue ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 90, align: 'right' });
         y += 18;
       }
 
-      if (invoice.taxAmount && invoice.taxAmount > 0) {
+      if (invoice.taxRate && invoice.taxRate > 0) {
         doc.fillColor('#6b7280').font('Helvetica')
           .text(`${invoice.taxName || 'Tax'} (${invoice.taxRate ?? 0}%):`, summaryX, y, { width: 120, align: 'right' })
           .fillColor('#111827').font('Helvetica-Bold')
-          .text(`${currency}${(invoice.taxAmount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 80, align: 'right' });
+          .text(`${currency}${(invoice.taxRate ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 90, align: 'right' });
         y += 25;
       } else {
         y += 10;
@@ -246,9 +246,9 @@ export class RedElegantTemplate {
 
       // Total Amount Due
       doc.fillColor('#111827').fontSize(14).font('Helvetica-Bold')
-        .text('Total Amount Due:', summaryX, y, { width: 120, align: 'right' })
+        .text('Total Amount:', summaryX, y, { width: 120, align: 'right' })
         .fontSize(16).fillColor('#991b1b')
-        .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 80, align: 'right' });
+        .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 130, y, { width: 90, align: 'right' });
 
       // Signature Line
       y += 80;

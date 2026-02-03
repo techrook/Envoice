@@ -152,10 +152,10 @@ export class ModernTemplate {
       doc.rect(50, tableTop, 500, 25).fill('#6366f1');
       doc.fillColor('#ffffff').fontSize(10).font('Helvetica-Bold')
         .text('DESCRIPTION', 60, tableTop + 8)
-        .text('QTY', 340, tableTop + 8)
-        .text('PRICE', 385, tableTop + 8)
+        .text('QTY', 320, tableTop + 8)
+        .text('PRICE', 370, tableTop + 8)
         .text('DISC', 445, tableTop + 8)
-        .text('AMOUNT', 490, tableTop + 8, { width: 55, align: 'right' });
+        .text('AMOUNT', 495, tableTop + 8);
 
       // ✅ FIXED: Dynamic row heights
       let y = tableTop + 35;
@@ -166,7 +166,7 @@ export class ModernTemplate {
         const amount = item.amount ?? 0;
         subTotal += amount;
 
-        const descWidth = 270;
+        const descWidth = 250;
         doc.fontSize(9).font('Helvetica');
         const descHeight = doc.heightOfString(item.description || '', { width: descWidth });
         const rowHeight = Math.max(25, descHeight + 10);
@@ -179,10 +179,10 @@ export class ModernTemplate {
           .text(item.description || '', 60, y + 3, { width: descWidth, lineGap: 1 });
 
         const centerY = y + (rowHeight / 2) - 5;
-        doc.text((item.quantity ?? 0).toString(), 340, centerY, { width: 40 });
-        doc.text(`${currency}${(item.unitPrice ?? 0).toFixed(2)}`, 385, centerY, { width: 50 });
-        doc.text(`${currency}${(item.discount ?? 0).toFixed(2)}`, 445, centerY, { width: 35 });
-        doc.text(`${currency}${amount.toFixed(2)}`, 490, centerY, { width: 55, align: 'right' });
+        doc.text((item.quantity ?? 0).toString(), 320, centerY, { width: 40 });
+        doc.text(`${currency}${(item.unitPrice ?? 0).toFixed(2)}`, 370, centerY, { width: 65 });
+        doc.text(`${currency}${(item.discount ?? 0).toFixed(2)}`, 445, centerY, { width: 40 });
+        doc.text(`${currency}${amount.toFixed(2)}`, 495, centerY, { width: 55 });
 
         y += rowHeight;
         rowIndex++;
@@ -195,26 +195,26 @@ export class ModernTemplate {
       doc.fontSize(10).fillColor('#64748b')
         .text('Subtotal:', summaryX, y, { width: 100, align: 'right' })
         .fillColor('#1e293b')
-        .text(`${currency}${subTotal.toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+        .text(`${currency}${subTotal.toFixed(2)}`, summaryX + 110, y, { width: 100, align: 'right' });
 
-      if (invoice.invoiceDiscount && invoice.invoiceDiscount > 0) {
+      if (invoice.discountValue && invoice.discountValue > 0) {
         y += 20;
         const discountLabel = invoice.discountType === 'PERCENTAGE'
-          ? `${currency}${invoice.discountValue ?? 0}%`
+          ? `${(invoice.discountValue ?? 0).toFixed(2)}%`
           : `${currency}${(invoice.discountValue ?? 0).toFixed(2)}`;
 
         doc.fillColor('#64748b')
           .text(`Discount (${discountLabel}):`, summaryX, y, { width: 100, align: 'right' })
           .fillColor('#dc2626')
-          .text(`-${currency}${(invoice.invoiceDiscount ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+          .text(`-${currency}${(invoice.discountValue ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 100, align: 'right' });
       }
 
-      if (invoice.taxAmount && invoice.taxAmount > 0) {
+      if (invoice.taxRate && invoice.taxRate > 0) {
         y += 20;
         doc.fillColor('#64748b')
           .text(`${invoice.taxName || 'Tax'} (${invoice.taxRate ?? 0}%):`, summaryX, y, { width: 100, align: 'right' })
           .fillColor('#1e293b')
-          .text(`${currency}${(invoice.taxAmount ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 90, align: 'right' });
+          .text(`${currency}${(invoice.taxAmount ?? 0).toFixed(2)}`, summaryX + 110, y, { width: 100, align: 'right' });
       }
 
       // Total
@@ -223,7 +223,7 @@ export class ModernTemplate {
       doc.fillColor('#ffffff').fontSize(14).font('Helvetica-Bold')
         .text('TOTAL:', summaryX + 10, y + 5, { width: 80 })
         .fontSize(16)
-        .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 100, y + 5, { width: 100, align: 'right' });
+        .text(`${currency}${(invoice.totalAmount ?? 0).toFixed(2)}`, summaryX + 100, y + 5, { width: 110, align: 'right' });
 
       // Notes
       y += 60;
