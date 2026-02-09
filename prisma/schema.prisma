@@ -52,6 +52,7 @@ model BusinessProfile {
   name      String
   logo      String?  
   location  String
+  countryCode String @default("+234")
   contact   String
   currency  Currency @default(NGN)
   createdAt DateTime @default(now())

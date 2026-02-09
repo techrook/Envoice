@@ -26,6 +26,11 @@ export class CreateBusinessProfileDto {
   @IsString()
   @IsNotEmpty()
   contact: string;
+  
+  @ApiProperty({ example: '+234', description: 'Business contact country code' })
+  @IsString()
+  @IsNotEmpty()
+  countryCode: string;
 
     @ApiProperty({
     example: 'NGN',
@@ -34,6 +39,7 @@ export class CreateBusinessProfileDto {
   })
   @IsEnum(Currency)
   currency: Currency;
+  
 }
 
 export class UpdateBusinessProfileDto {
