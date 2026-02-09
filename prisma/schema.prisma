@@ -81,6 +81,9 @@ model Invoice {
   status        InvoiceStatus  @default(PENDING)
   currency      Currency @default(NGN)
   notes         String?
+
+  pdfUrl        String?      
+  whatsappUrl   String?        
   
   template       String   @default("MODERN")
   taxName       String?       

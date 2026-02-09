@@ -52,7 +52,6 @@ export class InvoiceService {
   
     const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000000)}`;
   
-    // Step 1: Calculate item-level totals
     const processedItems = items.map((item) => {
       const baseAmount = item.unitPrice * item.quantity;
       const discount = item.isPercentageDiscount
@@ -67,7 +66,6 @@ export class InvoiceService {
   
     const subtotal = processedItems.reduce((sum, item) => sum + item.amount, 0);
   
-    // Step 2: Apply invoice-level discount
     let discountedTotal = subtotal;
   
     if (discountType === 'PERCENTAGE') {
@@ -76,11 +74,10 @@ export class InvoiceService {
       discountedTotal -= discountValue || 0;
     }
   
-    // Step 3: Apply tax
+
     const taxAmount = (taxRate || 0) / 100 * discountedTotal;
     const totalAmount = discountedTotal + taxAmount;
   
-    // Step 4: Create invoice
     const invoice = await this.prisma.invoice.create({
       data: {
         ...invoiceData,
