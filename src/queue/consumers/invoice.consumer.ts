@@ -8,6 +8,8 @@ import { EmailService } from 'src/common/email/email.service';
 import { PrismaClient } from '@prisma/client';
 const { onInvoiceCreated, InvoiceQ } = CONSTANT;
 import { InvoiceService } from 'src/invoice/invoice.service';
+import { FileUploadService } from 'src/common/file-upload/file-upload.service';
+import { WhatsAppService } from 'src/common/whatsapp/whatsapp.service';
 @Processor(InvoiceQ)
 @Injectable()
 export class InvoiceConsumer extends IBaseWoker {
@@ -16,6 +18,8 @@ export class InvoiceConsumer extends IBaseWoker {
     private readonly prisma: PrismaClient,
     private readonly emailService: EmailService,
     private readonly invoiceService: InvoiceService,
+    private readonly fileUploadService: FileUploadService,
+    private readonly whatsappService: WhatsAppService,
   ) {
     super(log);
   }
@@ -43,15 +47,39 @@ export class InvoiceConsumer extends IBaseWoker {
           invoice,
           user,
           client,
-        ); // implement this service
+        ); 
 
-        // 3. Send Email
+        this.log.log('Uploading PDF to Cloudinary...');
+      const pdfFile = {
+        buffer: pdfBuffer,
+        originalname: `invoice-${invoice.invoiceNumber}.pdf`,
+      };
+
+      const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:4567';
+
+      const pdfUrl = `${apiBaseUrl}/invoices/pdf/public/${invoice.id}`;//the edpoint url 
+        
+
+        this.log.log('Generating WhatsApp URL...');
+      const whatsappUrl = await this.whatsappService.generateInvoiceWhatsAppUrl(
+        invoice,
+        pdfUrl,
+      );
+
+      await this.prisma.invoice.update({
+        where: { id: invoice.id },
+        data: { whatsappUrl, pdfUrl },
+      });
+
+
         await this.emailService.sendInvoiceToUser(
           user,
           client,
           invoice,
           pdfBuffer,
         );
+
+        
 
         break;
       }

@@ -8,7 +8,8 @@ import {
   Delete, 
   UseGuards, 
   Req,
-  Res // ✅ ADD THIS
+  Res, // ✅ ADD THIS
+  HttpStatus
 } from '@nestjs/common';
 import { Response } from 'express'; // ✅ ADD THIS
 import { InvoiceService } from './invoice.service';
@@ -85,13 +86,6 @@ async downloadInvoicePdf(
       return res.status(404).json({ message: 'Invoice not found' });
     }
 
-    // 2. Debugging: Log this to your terminal to see if the values exist
-    console.log('PDF Data Check:', {
-      tax: invoice.taxRate,   
-      discount: invoice.discountValue,
-      itemCount: invoice.items?.length
-    });
-
     const user = await this.prisma.user.findUnique({
       where: { id: req.user.id },
     });   
@@ -111,6 +105,63 @@ async downloadInvoicePdf(
     return res.status(500).json({ message: 'Failed to generate PDF' });
   }
 }
+
+
+  @Get('pdf/public/:invoiceId')
+  async getPublicInvoicePdf(
+    @Param('invoiceId') invoiceId: string,
+    @Res() res: Response,
+  ) {
+    try {
+      // Fetch invoice with all relations
+      const invoice = await this.invoiceService.findInvoiceById(invoiceId);
+
+      if (!invoice) {
+        return res.status(HttpStatus.NOT_FOUND).json({ 
+          message: 'Invoice not found' 
+        });
+      }
+
+      // Fetch user and client
+      const [user, client] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: invoice.userId },
+          include: { businessProfile: true },
+        }),
+        this.prisma.client.findUnique({
+          where: { id: invoice.clientId },
+        }),
+      ]);
+
+      if (!user || !client) {
+        return res.status(HttpStatus.NOT_FOUND).json({ 
+          message: 'Invoice data incomplete' 
+        });
+      }
+
+      // Generate PDF buffer
+      const pdfBuffer = await this.invoiceService.generateBusinessCopyPdf(
+        invoice,
+        user,
+        client,
+      );
+
+      // Set headers for PDF download
+      const filename = `Invoice-${invoice.invoiceNumber || invoice.id.slice(0, 8)}.pdf`;
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`); // inline = view in browser
+      res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+      res.setHeader('Access-Control-Allow-Origin', '*'); // Allow cross-origin access
+
+      return res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating public PDF:', error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ 
+        message: 'Failed to generate PDF' 
+      });
+    }
+  }
 
   @Post('create')
   @ApiOperation({ summary: 'Create an invoice' })

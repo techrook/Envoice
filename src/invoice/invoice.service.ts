@@ -105,6 +105,12 @@ export class InvoiceService {
       },
       include: {
         items: true,
+        user: {
+          include: {
+            businessProfile: true,
+          },
+        },
+        client:true,
       },
     });
     
@@ -425,6 +431,25 @@ async generateBusinessCopyPdf(invoice: any, user: any, client: any): Promise<Buf
     });
 
     if (!invoice || invoice.userId !== userId) {
+      throw new ForbiddenException(CONSTANT.INVOICE_UPDATE_FORBIDDEN);
+    }
+
+    return invoice;
+  }
+
+  async  findInvoiceById(invoiceId:string){
+    const invoice = await this.prisma.invoice.findFirst({
+      where: {
+        id: invoiceId,
+      },
+      include: { client: true, items: true, user: {
+        include: {
+          businessProfile: true,
+        },
+      }, },
+    });
+
+    if (!invoice) {
       throw new ForbiddenException(CONSTANT.INVOICE_UPDATE_FORBIDDEN);
     }
 

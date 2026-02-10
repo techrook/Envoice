@@ -11,8 +11,9 @@ import { BusinessProfileService } from 'src/business-profile/business-profile.se
 import { InvoiceConsumer } from './consumers/invoice.consumer';
 import { InvoiceService } from 'src/invoice/invoice.service';
 import { ClientService } from 'src/client/client.service';
+import { WhatsAppService } from 'src/common/whatsapp/whatsapp.service';
 @Module({
-  providers: [SignUpConsumer, SignUpEventListener, PrismaClient, EmailService,PrismaService,BusinessProfileConsumer,FileUploadService,UsersService,BusinessProfileService,InvoiceConsumer,InvoiceService,BusinessEventListener, ClientService], 
+  providers: [SignUpConsumer, SignUpEventListener, PrismaClient, EmailService,PrismaService,BusinessProfileConsumer,FileUploadService,UsersService,BusinessProfileService,InvoiceConsumer,InvoiceService,BusinessEventListener, ClientService, WhatsAppService], 
 
   imports: [],
 })
