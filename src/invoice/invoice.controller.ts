@@ -17,6 +17,7 @@ import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/create-invoice-dto';
 import { JwtAuthGuard } from '../auth/JwtAuthGuard/jwt-auth.guard';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { PrismaService } from '../prisma/prisma.service'
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Invoices')
 @ApiBearerAuth()
@@ -106,7 +107,7 @@ async downloadInvoicePdf(
   }
 }
 
-
+@Public()
   @Get('pdf/public/:invoiceId')
   async getPublicInvoicePdf(
     @Param('invoiceId') invoiceId: string,
