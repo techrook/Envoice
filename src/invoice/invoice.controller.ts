@@ -181,7 +181,7 @@ async downloadInvoicePdf(
   @Get(':invoiceId')
   async getInvoice(@Param('invoiceId') invoiceId: string, @Req() req) {
     const userId = req.user.id; 
-    return this.invoiceService.findInvoiceByIdAndUserId(userId, invoiceId);
+    return this.invoiceService.findInvoiceByIdAndUserId(invoiceId, userId );
   }
 
   @Patch('update/:id')

@@ -429,7 +429,6 @@ async generateBusinessCopyPdf(invoice: any, user: any, client: any): Promise<Buf
       },
       include: { client: true, items: true },
     });
-
     if (!invoice || invoice.userId !== userId) {
       throw new ForbiddenException(CONSTANT.INVOICE_UPDATE_FORBIDDEN);
     }
